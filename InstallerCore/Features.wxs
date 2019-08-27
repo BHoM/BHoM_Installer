@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Fragment>
+
+    <WixVariable Id="WixUILicenseRtf" Value="lgpl-3.0.rtf" />
+    <WixVariable Id="WixUIDialogBmp" Value="Bitmap\welcome.bmp" />
+    <WixVariable Id="WixUIBannerBmp" Value="Bitmap\bannrbmp.bmp" />
+
+    <Property Id="ALLUSERS" Secure="yes" Value="2"/>
+    <Property Id="MSIINSTALLPERUSER" Secure="yes" Value="1" />
+
+    <Property Id="PromptToCloseProcesses" Value="EXCEL" />
+    <Property Id="PromptToCloseDisplayNames" Value="Microsoft Excel" />
+
+    <Property Id="CopyrightHolder" Value="The BHoM Contributors" />
+    <Property Id="CopyrightUrl" Value="https://github.com/BHoM" />
+
+    <FeatureGroup Id="CoreComponents">
+      <Feature Id="BHoM" Title="BHoM Core" Level="1">
+        <ComponentGroupRef Id="ASSEMBLIES" />
+        <ComponentGroupRef Id="DATA" />
+      </Feature>
+
+      <Feature Id="ExcelFeature" Title="Excel Plugin" Level="1">
+        <ComponentGroupRef Id="Excel" />
+      </Feature>
+
+      <Feature Id="GrasshopperPlugin" Title="Grasshopper Plugin" Level="1">
+        <ComponentGroupRef Id="Grasshopper" />
+      </Feature>
+
+      <Feature Id="Revit2018Plugin" Title="Revit Plugin" Level="1">
+        <ComponentGroupRef Id="Revit2018" />
+        <ComponentGroupRef Id="Revit2019" />
+      </Feature>
+
+      <Feature Id="DynamoPlugin" Title="Dynamo Plugin" Level="1">
+        <ComponentGroupRef Id="Dynamo" />
+      </Feature>
+    </FeatureGroup>
+	</Fragment>
+</Wix>

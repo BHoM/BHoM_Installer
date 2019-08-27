@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="AppDataFolder">
+        <Directory Id="INSTALLFOLDER" Name="BHoM">
+          <Directory Id="ASSEMBLIESDIR" Name="Assemblies" />
+          <Directory Id="FILESDIR" Name="DataSets" />
+        </Directory>
+
+        <Directory Id="GHDIR" Name="Grasshopper" >
+          <Directory Id="GHLIBSDIR" Name="Libraries">
+            <Directory Id="GHBHOMDIR" Name="BHoM" />
+          </Directory>
+        </Directory>
+
+        <Directory Id="AUTODESKDIR" Name="Autodesk" >
+          <Directory Id="REVITDIR" Name="Revit">
+            <Directory Id="REVITADDINSDIR" Name="Addins">
+              <Directory Id="R2018DIR" Name="2018">
+                <Directory Id="R2018BHOMDIR" Name="BHoM" />
+              </Directory>
+              <Directory Id="R2019DIR" Name="2019">
+                <Directory Id="R2019BHOMDIR" Name="BHoM" />
+              </Directory>
+            </Directory>
+          </Directory>
+        </Directory>
+
+        <Directory Id="DYNAMODIR" Name="Dynamo" >
+          <Directory Id="DYNAMOCOREDIR" Name="Dynamo Core" >
+            <Directory Id="DYNAMOCORE13DIR" Name="1.3" >
+              <Directory Id="DYNAMOCOREPKGDIR" Name="packages" >
+                <Directory Id="DYNAMOCOREBHOMDIR" Name="BHoM" >
+                  <Directory Id="DYNCBHOMDIR" Name="bin" />
+                </Directory>
+              </Directory>
+            </Directory>
+          </Directory>
+          <Directory Id="DYNAMOREVITDIR" Name="Dynamo Revit" >
+            <Directory Id="DYNAMOREVIT13DIR" Name="1.3" >
+              <Directory Id="DYNAMOREVITPKGDIR" Name="packages" >
+                <Directory Id="DYNAMOREVITBHOMDIR" Name="BHoM" >
+                  <Directory Id="DYNRBHOMDIR" Name="bin" />
+                </Directory>
+              </Directory>
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+	</Fragment>
+</Wix>

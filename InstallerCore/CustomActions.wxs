@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+	<Fragment>
+
+    <Property Id="OFFICEREGKEYS" Value="11.0,12.0,14.0,15.0,16.0" />
+
+    <Property Id="XLL32" Value="BHoM-AddIn.xll" />
+    <Property Id="XLL64" Value="BHoM-AddIn64.xll" />
+
+    <Binary Id="InstallerCA.CA.dll" SourceFile="$(var.InstallerCA.TargetDir)$(var.InstallerCA.TargetName).CA.dll" />
+
+    <CustomAction Id="GenGHLink" Directory="GHLIBSDIR" ExeCommand="cmd.exe /c &quot;echo [ASSEMBLIESDIR]$(var.Grasshopper_UI.TargetName).gha &gt; $(var.Grasshopper_UI.TargetName).ghlink&quot;" Execute="commit" Return="ignore"></CustomAction>
+    <CustomAction Id="DelGHLink" Directory="GHLIBSDIR" ExeCommand="cmd.exe /c &quot;del $(var.Grasshopper_UI.TargetName).ghlink&quot;" Execute="commit" Return="ignore"></CustomAction>
+
+    <CustomAction Id="Action_RegisterAddIn.SetProperty" Return="check" Property="Action_RegisterAddIn" Value="FOLDER=[ASSEMBLIESDIR];OFFICEREGKEYS=[OFFICEREGKEYS];XLL32=[XLL32];XLL64=[XLL64]" />
+    <CustomAction Id="Action_RegisterAddIn" BinaryKey="InstallerCA.CA.dll" DllEntry="CaRegisterAddIn" Return="ignore" Execute="deferred" />
+    <CustomAction Id="Action_UnRegisterAddIn.SetProperty" Return="check" Property="Action_UnRegisterAddIn" Value="FOLDER=[ASSEMBLIESDIR];OFFICEREGKEYS=[OFFICEREGKEYS];XLL32=[XLL32];XLL64=[XLL64]" />
+    <CustomAction Id="Action_UnRegisterAddIn" BinaryKey="InstallerCA.CA.dll" DllEntry="CaUnRegisterAddIn" Return="ignore" Execute="deferred" />
+
+    <CustomAction Id="Action_CloseAppsPrompt" BinaryKey="InstallerCA.CA.dll" DllEntry="ClosePrompt" Return="check" />
+
+    <SetProperty Id="GHBHoMFolder" Value="[GHBHOMDIR]" Before="CostInitialize" />
+    <SetProperty Id="R2018BHoMFolder" Value="[R2018BHOMDIR]" Before="CostInitialize" />
+    <SetProperty Id="R2019BHoMFolder" Value="[R2019BHOMDIR]" Before="CostInitialize" />
+
+	</Fragment>
+</Wix>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+ 
+	<Product Id="*" Name="Buildings and Habitats object Model" Language="1033" Version="$(var.Version)" Manufacturer="https://bhom.xyz" UpgradeCode="64c4dabf-7d02-4412-b422-953e47c780c8">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perUser" />
+    <MajorUpgrade AllowDowngrades="yes" />
+		<MediaTemplate EmbedCab="yes" />
+
+    <UIRef Id="BHoMInstallerUI"/>
+
+    <FeatureGroupRef Id="CoreComponents"/>
+
+    <InstallExecuteSequence>
+    
+      <Custom Action="Action_CloseAppsPrompt" After="Action_RegisterAddIn.SetProperty" />
+
+      <Custom Action="Action_RegisterAddIn.SetProperty" Before="Action_RegisterAddIn">NOT Installed</Custom>
+      <Custom Action="Action_RegisterAddIn" Before="InstallFinalize">NOT Installed</Custom>
+      <Custom Action="Action_UnRegisterAddIn.SetProperty" Before="Action_UnRegisterAddIn">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+      <Custom Action="Action_UnRegisterAddIn" Before="InstallFinalize">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+
+      <Custom Action="GenGHLink" Before="InstallFinalize">NOT Installed</Custom>
+      <Custom Action="DelGHLink" Before="InstallFinalize">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+    </InstallExecuteSequence>
+
+    <AdminExecuteSequence>
+      <Custom Action="Action_CloseAppsPrompt" After="Action_RegisterAddIn.SetProperty" />
+
+      <Custom Action="Action_RegisterAddIn.SetProperty" Before="Action_RegisterAddIn">NOT Installed</Custom>
+      <Custom Action="Action_RegisterAddIn" Before="InstallFinalize">NOT Installed</Custom>
+      <Custom Action="Action_UnRegisterAddIn.SetProperty" Before="Action_UnRegisterAddIn">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+      <Custom Action="Action_UnRegisterAddIn" Before="InstallFinalize">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+
+      <Custom Action="GenGHLink" Before="InstallFinalize">NOT Installed</Custom>
+      <Custom Action="DelGHLink" Before="InstallFinalize">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+    </AdminExecuteSequence>
+
+  </Product>
+</Wix>

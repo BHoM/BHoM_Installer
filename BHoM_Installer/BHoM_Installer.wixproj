@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <MajorVersion Condition=" '$(MajorVersion)' == '' ">2</MajorVersion>
+    <MinorVersion Condition=" '$(MinorVersion)' == '' ">4</MinorVersion>
+    <VersionSuffix>
+    </VersionSuffix>
+    <ProductVersion>$(MajorVersion).$(MinorVersion)</ProductVersion>
+    <ProjectGuid>0965f49d-5ce6-4e54-9e86-aacc7fe0f035</ProjectGuid>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputType>Package</OutputType>
+    <EnableProjectHarvesting>True</EnableProjectHarvesting>
+    <ReleaseType Condition=" '$(ReleaseType)' == '' ">alpha</ReleaseType>
+    <ReleaseVersion Condition=" '$(ReleaseType)' == 'alpha' ">0</ReleaseVersion>
+    <ReleaseVersion Condition=" '$(ReleaseType)' == 'beta' ">1</ReleaseVersion>
+    <ReleaseVersion Condition=" '$(ReleaseVersion)' == '' ">0</ReleaseVersion>
+    <PatchVersion Condition=" '$(PatchVersion)' == '' ">0</PatchVersion>
+    <WixProductVersion>$(ProductVersion).$(ReleaseVersion).$(PatchVersion)</WixProductVersion>
+    <OutputPath>..\Build\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug;Version=$(WixProductVersion);DataDir=DataSets;FilesDir=Assemblies</DefineConstants>
+    <SuppressAllWarnings>False</SuppressAllWarnings>
+    <Pedantic>False</Pedantic>
+    <SuppressValidation>False</SuppressValidation>
+    <SuppressIces>ICE64;ICE38;ICE91</SuppressIces>
+    <Cultures>en-US</Cultures>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Version=$(WixProductVersion);DataDir=DataSets;FilesDir=Assemblies</DefineConstants>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <Cultures>en-US</Cultures>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutputName>BHoM_v$(ProductVersion).$(ReleaseType).$(PatchVersion)$(VersionSuffix)</OutputName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Product.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\InstallerCA\InstallerCA.csproj">
+      <Name>InstallerCA</Name>
+      <Project>{f135d7b8-747c-4c4f-a9fc-1f3a25fbd403}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\InstallerCore\InstallerCore.wixproj">
+      <Name>InstallerCore</Name>
+      <Project>{9269f4f2-f136-46a8-9ba2-4899c5ca38d3}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="WixUtilExtension">
+      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
+      <Name>WixUtilExtension</Name>
+    </WixExtension>
+    <WixExtension Include="WixUIExtension">
+      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
+      <Name>WixUIExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
+  <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
+    <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
+  </Target>
+</Project>
