@@ -10,6 +10,11 @@ $includes = gc $incFilePath
 $uisFilePath = "$ENV:BUILD_SOURCESDIRECTORY\BHoM_Installer\userInterfaces.txt"
 $uis = gc $uisFilePath
 
+# **** READ ALT CONFIGS ARRAY ****
+$configsFilePath = "$ENV:BUILD_SOURCESDIRECTORY\BHoM_Installer\altConfigs.txt"
+$altconfigs = gc $configsFilePath
+
+
 
 # **** Constants ****
 $msbuildPath = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe"
@@ -37,16 +42,20 @@ ForEach ($repo in $includes) {
 }
 
 
-# **** Build alternate Revit Configurations ****
-$repo = "Revit_Toolkit"
-$slnPath = "$ENV:BUILD_SOURCESDIRECTORY\$repo\$repo.sln"
-$configurations = @("Release2018","Release2019")
-
-ForEach ($config in $configurations) 
+# **** Build Alternate Configurations ****
+ForEach ($altconfig in $altconfigs) 
 {
+  $parts = $altconfig.split("/")
+  $org = $parts[0]
+  $repo = $parts[1]
+  $config = $parts[2]
+
+  $slnPath = "$ENV:BUILD_SOURCESDIRECTORY\$repo\$repo.sln"
+
   write-Output ("Building " + $repo + " " + $config)
   & $msbuildPath -nologo $slnPath /verbosity:minimal /p:Configuration=$config
 }
+
 
 
 # **** Iterate over all UIs ****
