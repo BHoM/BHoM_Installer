@@ -7,10 +7,70 @@ trigger:
 - master
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'vs2017-win2016'
 
 variables:
-  solution: '**/*.sln'
+  solution: '**/BHoM_Installer.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
+steps:
+
+- checkout: self
+  persistCredentials: true
+
+- task: CopyFiles@2
+  displayName: 'Move Cloned Files to Correct Toolkit Folder'
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: '**'
+    TargetFolder: '$(Build.SourcesDirectory)/BHoM_Installer'
+
+- task: DeleteFiles@1
+  displayName: 'Clean Up After Moving Cloned Files'
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: 'BHoM_Installer.sln'
+
+- task: NuGetToolInstaller@1
+
+- task: PowerShell@2
+  displayName: 'Clone and Build All Required Repos'
+  inputs:
+    filePath: 'CloneAndBuildAllRequiredRepos.ps1'
+
+- task: NuGetCommand@2
+  displayName: 'Restore NuGets for Primary Solution'
+  inputs:
+    restoreSolution: '$(solution)'    
+
+- task: PowerShell@2
+  displayName: 'Get Date Stamp for Alpha Patch Versioning'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $dateStr = (Get-Date).ToString("yyMMdd")
+      Write-Host "##vso[task.setvariable variable=dateVersion;]$dateStr"
+
+- task: PowerShell@2
+  displayName: 'Build Primary Solution'
+  env:
+    ReleaseType: $(ReleaseType)
+    PatchVersion: $(PatchVersion)
+  inputs:
+    filePath: 'BuildSolution.ps1'
+
+- task: CopyFiles@2
+  displayName: 'Copy .msi into Artifact Staging Area'
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/BHoM_Installer/Build/'
+    Contents: '**/**.msi'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    CleanTargetFolder: true
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish .msi'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'BHoM_Installer'
+    publishLocation: 'Container'
