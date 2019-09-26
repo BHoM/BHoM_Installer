@@ -36,7 +36,7 @@
     <Cultures>en-US</Cultures>
   </PropertyGroup>
   <PropertyGroup>
-    <OutputName>BHoM_v$(ProductVersion).$(ReleaseType).$(PatchVersion)$(VersionSuffix)</OutputName>
+    <OutputName>$(PatchVersion)_BHoM_v$(ProductVersion).$(ReleaseType)</OutputName>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Product.wxs" />
