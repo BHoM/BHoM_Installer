@@ -38,6 +38,10 @@ steps:
   displayName: 'Clone and Build All Required Repos'
   inputs:
     filePath: 'CloneAndBuildAllRequiredRepos.ps1'
+  env:
+    ReleaseType: $(ReleaseType)
+    PatchVersion: $(PatchVersion)
+    Version: $(Version)
 
 - task: NuGetCommand@2
   displayName: 'Restore NuGets for Primary Solution'
@@ -57,6 +61,7 @@ steps:
   env:
     ReleaseType: $(ReleaseType)
     PatchVersion: $(PatchVersion)
+    Version: $(Version)
   inputs:
     filePath: 'BuildSolution.ps1'
 
