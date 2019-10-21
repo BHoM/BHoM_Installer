@@ -4,29 +4,29 @@
 
     <ComponentGroup Id="Excel" Directory="ASSEMBLIESDIR">
       <Component Id="XLL32" Guid="*">
-        <File Source="$(var.Excel_UI.TargetDir)BHoM-AddIn.xll" />
+        <File Source="..\..\Excel_Toolkit\Build\BHoM-AddIn.xll" />
       </Component>
       <Component Id="XLL64" Guid="*">
-        <File Source="$(var.Excel_UI.TargetDir)BHoM-AddIn64.xll" />
+        <File Source="..\..\Excel_Toolkit\Build\BHoM-AddIn64.xll" />
       </Component>
       <Component Id="DNA32" Guid="*">
-        <File Source="$(var.Excel_UI.TargetDir)BHoM-AddIn.dna" />
+        <File Source="..\..\Excel_Toolkit\Build\BHoM-AddIn.dna" />
       </Component>
       <Component Id="DNA64" Guid="*">
-        <File Source="$(var.Excel_UI.TargetDir)BHoM-AddIn64.dna" />
+        <File Source="..\..\Excel_Toolkit\Build\BHoM-AddIn64.dna" />
       </Component>
     </ComponentGroup>
 
     <ComponentGroup Id="Grasshopper" Directory="ASSEMBLIESDIR">
       <Component Id="GHA" Guid="{A1EE1994-996D-4AF2-B61E-DA5C910534CC}">
-        <File KeyPath="yes" Source="$(var.Grasshopper_UI.TargetPath)" Name="$(var.Grasshopper_UI.TargetName).gha" />
+        <File KeyPath="yes" Source="..\..\Grasshopper_Toolkit\Build\BH.UI.Grasshopper.dll" Name="BH.UI.Grasshopper.gha" />
         <util:RemoveFolderEx On="install" Property="GHBHoMFolder" />
       </Component>
     </ComponentGroup>
 
     <ComponentGroup Id="Revit2018" Directory="R2018DIR">
       <Component Id="RevitAddin2018">
-        <File Source="$(var.Revit_UI.ProjectDir)Files\BHoM_2018.Addin" />
+        <File Source="..\..\Revit_Toolkit\Revit_UI\Files\BHoM_2018.Addin" />
         <util:RemoveFolderEx On="install" Property="R2018BHoMFolder" />
         <RemoveFile On="install" Id="RemoveLegacyAddin18" Name="BHoM.Addin"/>
       </Component>
@@ -34,7 +34,7 @@
 
     <ComponentGroup Id="Revit2019" Directory="R2019DIR">
       <Component Id="RevitAddin2019">
-        <File Source="$(var.Revit_UI.ProjectDir)Files\BHoM_2019.Addin" />
+        <File Source="..\..\Revit_Toolkit\Revit_UI\Files\BHoM_2019.Addin" />
         <util:RemoveFolderEx On="install" Property="R2019BHoMFolder" />
         <RemoveFile On="install" Id="RemoveLegacyAddin19" Name="BHoM.Addin"/>
       </Component>
@@ -42,7 +42,7 @@
 
     <ComponentGroup Id="Dynamo" Directory="DYNAMOREVITBHOMDIR">
       <Component Id="DynPkg">
-        <File Source="$(var.Dynamo_UI.ProjectDir)..\pkg.json">
+        <File Source="..\..\Dynamo_Toolkit\pkg.json">
           <CopyFile Id="CpyDynamoPkg" DestinationDirectory="DYNAMOCOREBHOMDIR" />
         </File>
       </Component>
