@@ -44,38 +44,6 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Dynamo_Toolkit\Dynamo_UI\Dynamo_UI.csproj">
-      <Name>Dynamo_UI</Name>
-      <Project>{814ccb48-c68a-4d65-a4b4-958ea6ab0bb6}</Project>
-      <Private>True</Private>
-      <DoNotHarvest>True</DoNotHarvest>
-      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Excel_Toolkit\Excel_UI\Excel_UI.csproj">
-      <Name>Excel_UI</Name>
-      <Project>{0faf6feb-80c3-474a-92bb-c886424ccbc8}</Project>
-      <Private>True</Private>
-      <DoNotHarvest>True</DoNotHarvest>
-      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Grasshopper_Toolkit\Grasshopper_UI\Grasshopper_UI.csproj">
-      <Name>Grasshopper_UI</Name>
-      <Project>{2e3b219e-7bd2-4f75-bfaf-9b7735827ed4}</Project>
-      <Private>True</Private>
-      <DoNotHarvest>True</DoNotHarvest>
-      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Revit_Toolkit\Revit_UI\Revit_UI.csproj">
-      <Name>Revit_UI</Name>
-      <Project>{928290e0-9cb8-4b96-bd7a-a2e4638824ac}</Project>
-      <Private>True</Private>
-      <DoNotHarvest>True</DoNotHarvest>
-      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
-    </ProjectReference>
     <ProjectReference Include="..\InstallerCA\InstallerCA.csproj">
       <Name>InstallerCA</Name>
       <Project>{639d9368-7833-42b3-b166-6fef55a21001}</Project>

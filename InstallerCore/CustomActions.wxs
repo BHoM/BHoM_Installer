@@ -9,8 +9,8 @@
 
     <Binary Id="InstallerCA.CA.dll" SourceFile="$(var.InstallerCA.TargetDir)$(var.InstallerCA.TargetName).CA.dll" />
 
-    <CustomAction Id="GenGHLink" Directory="GHLIBSDIR" ExeCommand="cmd.exe /c &quot;echo [ASSEMBLIESDIR]$(var.Grasshopper_UI.TargetName).gha &gt; $(var.Grasshopper_UI.TargetName).ghlink&quot;" Execute="commit" Return="ignore"></CustomAction>
-    <CustomAction Id="DelGHLink" Directory="GHLIBSDIR" ExeCommand="cmd.exe /c &quot;del $(var.Grasshopper_UI.TargetName).ghlink&quot;" Execute="commit" Return="ignore"></CustomAction>
+    <CustomAction Id="GenGHLink" Directory="GHLIBSDIR" ExeCommand="cmd.exe /c &quot;echo [ASSEMBLIESDIR]BH.UI.Grasshopper.gha &gt; BH.UI.Grasshopper.ghlink&quot;" Execute="commit" Return="ignore"></CustomAction>
+    <CustomAction Id="DelGHLink" Directory="GHLIBSDIR" ExeCommand="cmd.exe /c &quot;del BH.UI.Grasshopper.ghlink&quot;" Execute="commit" Return="ignore"></CustomAction>
 
     <CustomAction Id="Action_RegisterAddIn.SetProperty" Return="check" Property="Action_RegisterAddIn" Value="FOLDER=[ASSEMBLIESDIR];OFFICEREGKEYS=[OFFICEREGKEYS];XLL32=[XLL32];XLL64=[XLL64]" />
     <CustomAction Id="Action_RegisterAddIn" BinaryKey="InstallerCA.CA.dll" DllEntry="CaRegisterAddIn" Return="ignore" Execute="deferred" />
