@@ -19,6 +19,7 @@
       <Feature Id="BHoM" Title="BHoM Core" Level="1">
         <ComponentGroupRef Id="ASSEMBLIES" />
         <ComponentGroupRef Id="DATA" />
+        <ComponentGroupRef Id="Core" />
       </Feature>
 
       <Feature Id="ExcelFeature" Title="Excel Plugin" Level="1">

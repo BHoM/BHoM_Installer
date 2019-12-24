@@ -56,5 +56,14 @@
       </Component>
     </ComponentGroup>
 
+    <ComponentGroup Id="Core" Directory="INSTALLFOLDER">
+      <Component Id="CleanExisting">
+        <RegistryKey Root="HKCU" Key="Software\BHoM">
+          <RegistryValue Name="Installer" Type="integer" Value="1"></RegistryValue>
+        </RegistryKey>
+        <util:RemoveFolderEx On="both" Property="INSTALLFOLDER" />
+      </Component>
+    </ComponentGroup>
+
 	</Fragment>
 </Wix>
