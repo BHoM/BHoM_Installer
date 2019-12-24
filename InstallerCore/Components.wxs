@@ -53,6 +53,8 @@
         <File Source="..\..\Dynamo_Toolkit\pkg.json">
           <CopyFile Id="CpyDynamoPkg" DestinationDirectory="DYNAMOCOREBHOMDIR" />
         </File>
+        <util:RemoveFolderEx On="both" Property="DYNAMOCOREBHOMDIR" />
+        <util:RemoveFolderEx On="both" Property="DYNAMOREVITBHOMDIR" />
       </Component>
     </ComponentGroup>
 
