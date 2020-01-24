@@ -1,5 +1,6 @@
 BHoM/BHoM
 BHoM/BHoM_Engine
 BHoM/BHoM_Adapter
+BHoM/BHoM_UI
 BHoM/Socket_Toolkit
 BHoM/TriangleNet_Toolkit
