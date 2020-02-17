@@ -15,39 +15,26 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match='wix:Wix/wix:Fragment/wix:ComponentGroup/wix:Component[@Directory="ASSEMBLIESDIR"]/wix:File'>
+  <xsl:template match='wix:Wix/wix:Fragment/wix:ComponentGroup/wix:Component[@Directory="DYNC13BHOMDIR"]/wix:File'>
     <xsl:copy>
       <xsl:apply-templates select="@*"/>
       <xsl:element name="wix:CopyFile">
         <xsl:attribute name="Id">
-          <xsl:text>CpyDYNC13__</xsl:text>
-          <xsl:value-of select="generate-id()"/>
-        </xsl:attribute>
-        <xsl:attribute name="DestinationDirectory">
-          <xsl:text>DYNC13BHOMDIR</xsl:text>
-        </xsl:attribute>
-      </xsl:element>
-      <xsl:element name="wix:CopyFile">
-        <xsl:attribute name="Id">
-          <xsl:text>CpyDYNR13__</xsl:text>
+          <xsl:text>CpyDYNR13_</xsl:text>
           <xsl:value-of select="generate-id()"/>
         </xsl:attribute>
         <xsl:attribute name="DestinationDirectory">
           <xsl:text>DYNR13BHOMDIR</xsl:text>
         </xsl:attribute>
       </xsl:element>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match='wix:Wix/wix:Fragment/wix:ComponentGroup/wix:Component[@Directory="DYNC20BHOMDIR"]/wix:File'>
+    <xsl:copy>
+      <xsl:apply-templates select="@*"/>
       <xsl:element name="wix:CopyFile">
         <xsl:attribute name="Id">
-          <xsl:text>CpyDYNC20__</xsl:text>
-          <xsl:value-of select="generate-id()"/>
-        </xsl:attribute>
-        <xsl:attribute name="DestinationDirectory">
-          <xsl:text>DYNC20BHOMDIR</xsl:text>
-        </xsl:attribute>
-      </xsl:element>
-      <xsl:element name="wix:CopyFile">
-        <xsl:attribute name="Id">
-          <xsl:text>CpyDYNR20__</xsl:text>
+          <xsl:text>CpyDYNR20_</xsl:text>
           <xsl:value-of select="generate-id()"/>
         </xsl:attribute>
         <xsl:attribute name="DestinationDirectory">
@@ -56,7 +43,7 @@
       </xsl:element>
       <xsl:element name="wix:CopyFile">
         <xsl:attribute name="Id">
-          <xsl:text>CpyDYNR23__</xsl:text>
+          <xsl:text>CpyDYNR23_</xsl:text>
           <xsl:value-of select="generate-id()"/>
         </xsl:attribute>
         <xsl:attribute name="DestinationDirectory">
@@ -65,7 +52,7 @@
       </xsl:element>
       <xsl:element name="wix:CopyFile">
         <xsl:attribute name="Id">
-          <xsl:text>CpyDYNC23__</xsl:text>
+          <xsl:text>CpyDYNC23_</xsl:text>
           <xsl:value-of select="generate-id()"/>
         </xsl:attribute>
         <xsl:attribute name="DestinationDirectory">

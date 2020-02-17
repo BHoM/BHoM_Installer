@@ -48,13 +48,24 @@
       </Component>
     </ComponentGroup>
 
-    <ComponentGroup Id="Dynamo" Directory="DYNAMOREVITBHOMDIR">
-      <Component Id="DynPkg">
-        <File Source="..\..\Dynamo_Toolkit\pkg.json">
-          <CopyFile Id="CpyDynamoPkg" DestinationDirectory="DYNAMOCOREBHOMDIR" />
+    <ComponentGroup Id="Dynamo">
+      <Component Id="DynPkg13" Directory="DYNAMOREVIT13BHOMDIR">
+        <File Source="..\..\Dynamo_Toolkit\Dynamo13\pkg.json" Id="Dynamo13pkg">
+          <CopyFile Id="CpyDynamo13Pkg" DestinationDirectory="DYNAMOCORE13BHOMDIR" />
         </File>
-        <util:RemoveFolderEx On="both" Property="DYNAMOCOREBHOMDIR" />
-        <util:RemoveFolderEx On="both" Property="DYNAMOREVITBHOMDIR" />
+        <util:RemoveFolderEx On="both" Property="DYNAMOCORE13BHOMDIR" />
+        <util:RemoveFolderEx On="both" Property="DYNAMOREVIT13BHOMDIR" />
+      </Component>
+      <Component Id="DynPkg20" Directory="DYNAMOREVIT20BHOMDIR">
+        <File Source="..\..\Dynamo_Toolkit\Dynamo20\pkg.json" Id="Dynamo20pkg">
+          <CopyFile Id="CpyDynamo20Pkg" DestinationDirectory="DYNAMOCORE20BHOMDIR" />
+          <CopyFile Id="CpyDynamo23Pkg" DestinationDirectory="DYNAMOCORE23BHOMDIR" />
+          <CopyFile Id="CpyDynamoR23Pkg" DestinationDirectory="DYNAMOREVIT23BHOMDIR" />
+        </File>
+        <util:RemoveFolderEx On="both" Property="DYNAMOCORE20BHOMDIR" />
+        <util:RemoveFolderEx On="both" Property="DYNAMOREVIT20BHOMDIR" />
+        <util:RemoveFolderEx On="both" Property="DYNAMOCORE23BHOMDIR" />
+        <util:RemoveFolderEx On="both" Property="DYNAMOREVIT23BHOMDIR" />
       </Component>
     </ComponentGroup>
 

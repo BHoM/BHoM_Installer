@@ -38,6 +38,8 @@
 
       <Feature Id="DynamoPlugin" Title="Dynamo Plugin" Level="1">
         <ComponentGroupRef Id="Dynamo" />
+        <ComponentGroupRef Id="DYNAMO13" />
+        <ComponentGroupRef Id="DYNAMO20" />
       </Feature>
     </FeatureGroup>
 	</Fragment>
