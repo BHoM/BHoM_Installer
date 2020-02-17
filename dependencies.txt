@@ -4,3 +4,4 @@ BHoM/BHoM_Adapter
 BHoM/BHoM_UI
 BHoM/Socket_Toolkit
 BHoM/TriangleNet_Toolkit
+BHoM/Clipper_Toolkit
