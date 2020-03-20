@@ -1,3 +1,4 @@
+BHoM/CarbonQueryDatabase_Toolkit
 BHoM/ClimateEmergency_Toolkit
 BHoM/CSharp_Toolkit
 BHoM/DIALux_Toolkit
@@ -5,6 +6,7 @@ BHoM/ETABS_Toolkit
 BHoM/GSA_Toolkit
 BHoM/HTTP_Toolkit
 BHoM/IES_Toolkit
+BHoM/LifeCycleAssessment_Toolkit
 BHoM/Lusas_Toolkit
 BHoM/MidasCivil_Toolkit
 BHoM/Mongo_Toolkit
