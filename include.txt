@@ -17,5 +17,3 @@ BHoM/SAP2000_Toolkit
 BHoM/TAS_Toolkit
 BHoM/Versioning_Toolkit
 BHoM/XML_Toolkit
-BHoM/LifeCycleAssessment_Toolkit
-BHoM/CarbonQueryDatabase_Toolkit
