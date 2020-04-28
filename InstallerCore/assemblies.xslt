@@ -18,6 +18,9 @@
   <xsl:template match='wix:Wix/wix:Fragment/wix:ComponentGroup/wix:Component[@Directory="ASSEMBLIESDIR"]/wix:File'>
     <xsl:copy>
       <xsl:apply-templates select="@*"/>
+      <xsl:attribute name="KeyPath">
+        <xsl:text>no</xsl:text>
+      </xsl:attribute>
       <xsl:element name="wix:CopyFile">
         <xsl:attribute name="Id">
           <xsl:text>CpyDYNC13__</xsl:text>
