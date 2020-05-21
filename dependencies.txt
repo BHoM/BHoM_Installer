@@ -7,3 +7,4 @@ BHoM/TriangleNet_Toolkit
 BHoM/Clipper_Toolkit
 BHoM/HTTP_Toolkit
 BHoM/Localisation_Toolkit
+BHoM/Rhinoceros_Toolkit
