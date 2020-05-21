@@ -5,6 +5,7 @@ BHoM/DIALux_Toolkit
 BHoM/ETABS_Toolkit
 BHoM/GSA_Toolkit
 BHoM/IES_Toolkit
+BHoM/LadybugTools_Toolkit
 BHoM/LifeCycleAssessment_Toolkit
 BHoM/Lusas_Toolkit
 BHoM/MidasCivil_Toolkit
@@ -13,7 +14,6 @@ BHoM/Psychrometrics_Toolkit
 BHoM/RAM_Toolkit
 BHoM/Revit_Toolkit
 BHoM/RFEM_Toolkit
-BHoM/Rhinoceros_Toolkit
 BHoM/Robot_Toolkit
 BHoM/SAP2000_Toolkit
 BHoM/TAS_Toolkit
