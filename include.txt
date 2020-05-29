@@ -11,6 +11,7 @@ BHoM/Lusas_Toolkit
 BHoM/MidasCivil_Toolkit
 BHoM/Mongo_Toolkit
 BHoM/Psychrometrics_Toolkit
+BHoM/OpenStreetMap_Toolkit
 BHoM/RAM_Toolkit
 BHoM/Revit_Toolkit
 BHoM/RFEM_Toolkit
