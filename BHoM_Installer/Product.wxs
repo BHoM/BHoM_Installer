@@ -19,6 +19,9 @@
       <Custom Action="Action_UnRegisterAddIn.SetProperty" Before="Action_UnRegisterAddIn">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
       <Custom Action="Action_UnRegisterAddIn" Before="InstallFinalize">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
 
+      <Custom Action="Action_UnRegisterAddInOld.SetProperty" Before="Action_UnRegisterAddInOld" />
+      <Custom Action="Action_UnRegisterAddInOld" Before="InstallFinalize" />
+
       <Custom Action="GenGHLink" Before="InstallFinalize">NOT Installed</Custom>
       <Custom Action="DelGHLink" Before="InstallFinalize">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
     </InstallExecuteSequence>
@@ -30,6 +33,9 @@
       <Custom Action="Action_RegisterAddIn" Before="InstallFinalize">NOT Installed</Custom>
       <Custom Action="Action_UnRegisterAddIn.SetProperty" Before="Action_UnRegisterAddIn">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
       <Custom Action="Action_UnRegisterAddIn" Before="InstallFinalize">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+
+      <Custom Action="Action_UnRegisterAddInOld.SetProperty" Before="Action_UnRegisterAddInOld" />
+      <Custom Action="Action_UnRegisterAddInOld" Before="InstallFinalize" />
 
       <Custom Action="GenGHLink" Before="InstallFinalize">NOT Installed</Custom>
       <Custom Action="DelGHLink" Before="InstallFinalize">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
