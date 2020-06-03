@@ -75,6 +75,7 @@
           <RegistryValue Name="Installer" Type="integer" Value="1"></RegistryValue>
         </RegistryKey>
         <util:RemoveFolderEx On="both" Property="INSTALLFOLDER" />
+        <util:RemoveFolderEx On="both" Property="OLDINSTALLFOLDER" />
       </Component>
     </ComponentGroup>
 
