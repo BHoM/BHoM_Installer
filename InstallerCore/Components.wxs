@@ -26,7 +26,7 @@
 
     <ComponentGroup Id="Revit2018" Directory="R2018DIR">
       <Component Id="RevitAddin2018">
-        <File Source="..\..\Revit_Toolkit\Revit_UI\Files\BHoM_2018.Addin" />
+        <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2018.Addin" />
         <util:RemoveFolderEx On="install" Property="R2018BHoMFolder" />
         <RemoveFile On="install" Id="RemoveLegacyAddin18" Name="BHoM.Addin"/>
       </Component>
@@ -34,7 +34,7 @@
 
     <ComponentGroup Id="Revit2019" Directory="R2019DIR">
       <Component Id="RevitAddin2019">
-        <File Source="..\..\Revit_Toolkit\Revit_UI\Files\BHoM_2019.Addin" />
+        <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2019.Addin" />
         <util:RemoveFolderEx On="install" Property="R2019BHoMFolder" />
         <RemoveFile On="install" Id="RemoveLegacyAddin19" Name="BHoM.Addin"/>
       </Component>
@@ -42,7 +42,7 @@
 
     <ComponentGroup Id="Revit2020" Directory="R2020DIR">
       <Component Id="RevitAddin2020">
-        <File Source="..\..\Revit_Toolkit\Revit_UI\Files\BHoM_2020.Addin" />
+        <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2020.Addin" />
         <util:RemoveFolderEx On="install" Property="R2020BHoMFolder" />
         <RemoveFile On="install" Id="RemoveLegacyAddin20" Name="BHoM.Addin"/>
       </Component>
