@@ -16,6 +16,8 @@
     <CustomAction Id="Action_RegisterAddIn" BinaryKey="InstallerCA.CA.dll" DllEntry="CaRegisterAddIn" Return="ignore" Execute="deferred" />
     <CustomAction Id="Action_UnRegisterAddIn.SetProperty" Return="check" Property="Action_UnRegisterAddIn" Value="FOLDER=[ASSEMBLIESDIR];OFFICEREGKEYS=[OFFICEREGKEYS];XLL32=[XLL32];XLL64=[XLL64]" />
     <CustomAction Id="Action_UnRegisterAddIn" BinaryKey="InstallerCA.CA.dll" DllEntry="CaUnRegisterAddIn" Return="ignore" Execute="deferred" />
+    <CustomAction Id="Action_UnRegisterAddInOld.SetProperty" Return="check" Property="Action_UnRegisterAddInOld" Value="FOLDER=[OLDASSEMBLIESDIR];OFFICEREGKEYS=[OFFICEREGKEYS];XLL32=[XLL32];XLL64=[XLL64]" />
+    <CustomAction Id="Action_UnRegisterAddInOld" BinaryKey="InstallerCA.CA.dll" DllEntry="CaUnRegisterAddIn" Return="ignore" Execute="deferred" />
 
     <CustomAction Id="Action_CloseAppsPrompt" BinaryKey="InstallerCA.CA.dll" DllEntry="ClosePrompt" Return="check" />
 

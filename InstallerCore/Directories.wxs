@@ -10,7 +10,9 @@
       </Directory>
 
 			<Directory Id="AppDataFolder">
-        <Directory Id="OLDINSTALLFOLDER" Name="BHoM" />
+        <Directory Id="OLDINSTALLFOLDER" Name="BHoM">
+          <Directory Id="OLDASSEMBLIESDIR" Name="Assemblies" />
+        </Directory>
 
         <Directory Id="GHDIR" Name="Grasshopper" >
           <Directory Id="GHLIBSDIR" Name="Libraries">
