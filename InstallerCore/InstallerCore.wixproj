@@ -13,7 +13,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo13Dir=..\..\BHoM_Installer\InstallerCore\Dynamo13;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;</DefineConstants>
+    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgraders;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo13Dir=..\..\BHoM_Installer\InstallerCore\Dynamo13;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;</DefineConstants>
     <VerboseOutput>False</VerboseOutput>
     <LibBindFiles>False</LibBindFiles>
     <SuppressAllWarnings>False</SuppressAllWarnings>
@@ -24,7 +24,7 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <WixVariables>
     </WixVariables>
-    <DefineConstants>DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo13Dir=..\..\BHoM_Installer\InstallerCore\Dynamo13;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;</DefineConstants>
+    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgraders;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo13Dir=..\..\BHoM_Installer\InstallerCore\Dynamo13;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;</DefineConstants>
     <SuppressAllWarnings>False</SuppressAllWarnings>
     <Pedantic>False</Pedantic>
   </PropertyGroup>
@@ -71,17 +71,20 @@
   </Target>
   <Target Name="BeforeBuild">
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Assemblies\* Assemblies" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Upgrades\* Upgrades" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="del Assemblies\*.dna Assemblies\*.xll Assemblies\*.gha" />
-    <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E ..\..\BHoM_DataSets\DataSets DataSets" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\DataSets DataSets" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E ..\..\Dynamo_Toolkit\Dynamo13\Build\*.dll Dynamo13" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E ..\..\Dynamo_Toolkit\Dynamo20\Build\*.dll Dynamo20" />
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_assemblies.wxs" DirectoryRefId="ASSEMBLIESDIR" Directory="$(ProjectDir)Assemblies" ComponentGroupName="ASSEMBLIES" PreprocessorVariable="var.FilesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" Transforms="$(ProjectDir)assemblies.xslt" />
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_datasets.wxs" DirectoryRefId="FILESDIR" Directory="$(ProjectDir)DataSets" ComponentGroupName="DATA" PreprocessorVariable="var.DataDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" />
+    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_upgrades.wxs" DirectoryRefId="UPGRADESDIR" Directory="$(ProjectDir)Upgrades" ComponentGroupName="UPGRADES" PreprocessorVariable="var.UpgradesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" />
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_dyn13assemblies.wxs" DirectoryRefId="DYNC13BHOMDIR" Directory="$(ProjectDir)Dynamo13" ComponentGroupName="DYNAMO13" PreprocessorVariable="var.Dynamo13Dir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" Transforms="$(ProjectDir)dynamo.xslt" />
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_dyn20assemblies.wxs" DirectoryRefId="DYNC20BHOMDIR" Directory="$(ProjectDir)Dynamo20" ComponentGroupName="DYNAMO20" PreprocessorVariable="var.Dynamo20Dir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" Transforms="$(ProjectDir)dynamo.xslt" />
     <ItemGroup>
       <Compile Include="$(IntermediateOutputPath)_assemblies.wxs" />
       <Compile Include="$(IntermediateOutputPath)_datasets.wxs" />
+      <Compile Include="$(IntermediateOutputPath)_upgrades.wxs" />
       <Compile Include="$(IntermediateOutputPath)_dyn13assemblies.wxs" />
       <Compile Include="$(IntermediateOutputPath)_dyn20assemblies.wxs" />
     </ItemGroup>

@@ -18,6 +18,7 @@
     <FeatureGroup Id="CoreComponents">
       <Feature Id="BHoM" Title="BHoM Core" Level="1">
         <ComponentGroupRef Id="ASSEMBLIES" />
+        <ComponentGroupRef Id="UPGRADES" />
         <ComponentGroupRef Id="DATA" />
         <ComponentGroupRef Id="Core" />
       </Feature>
