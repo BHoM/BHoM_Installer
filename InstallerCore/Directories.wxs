@@ -5,7 +5,8 @@
 			<Directory Id="CommonAppDataFolder">
         <Directory Id="INSTALLFOLDER" Name="BHoM">
           <Directory Id="ASSEMBLIESDIR" Name="Assemblies" />
-          <Directory Id="FILESDIR" Name="DataSets" />
+          <Directory Id="FILESDIR" Name="Datasets" />
+          <Directory Id="UPGRADESDIR" Name="Upgrades" />
         </Directory>
       </Directory>
 
