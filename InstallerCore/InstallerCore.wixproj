@@ -13,7 +13,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgraders;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo13Dir=..\..\BHoM_Installer\InstallerCore\Dynamo13;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;</DefineConstants>
+    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgrades;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo13Dir=..\..\BHoM_Installer\InstallerCore\Dynamo13;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;</DefineConstants>
     <VerboseOutput>False</VerboseOutput>
     <LibBindFiles>False</LibBindFiles>
     <SuppressAllWarnings>False</SuppressAllWarnings>
@@ -24,7 +24,7 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <WixVariables>
     </WixVariables>
-    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgraders;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo13Dir=..\..\BHoM_Installer\InstallerCore\Dynamo13;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;</DefineConstants>
+    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgrades;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo13Dir=..\..\BHoM_Installer\InstallerCore\Dynamo13;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;</DefineConstants>
     <SuppressAllWarnings>False</SuppressAllWarnings>
     <Pedantic>False</Pedantic>
   </PropertyGroup>
