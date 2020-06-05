@@ -22,10 +22,6 @@ $msbuildPath = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\M
 git config --global user.email "BHoMBot@bhom.xyz"
 git config --global user.name "BHoMBot"
 
-# **** Clone Datasets ****
-Write-Output ("Cloning BHoM_Datasets to " + $ENV:BUILD_SOURCESDIRECTORY + "\BHoM_Datasets")
-git clone -q --branch=master https://github.com/BHoM/BHoM_Datasets.git  $ENV:BUILD_SOURCESDIRECTORY\BHoM_Datasets
-
 
 # **** Iterate over all dependencies ****
 write-Output ("**** ITERATE OVER ALL DEPENDENCIES ****")
