@@ -35,6 +35,7 @@
     <Compile Include="Features.wxs" />
     <Compile Include="UI\BHoMInstallerUI.wxs" />
     <Compile Include="UI\BHoMLicenseAgreementDlg.wxs" />
+    <Compile Include="UI\BHoMMaintenanceTypeDlg.wxs" />
     <Compile Include="UI\BHoMWelcomeDlg.wxs" />
   </ItemGroup>
   <ItemGroup>
