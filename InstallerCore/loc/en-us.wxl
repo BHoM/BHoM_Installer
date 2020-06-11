@@ -9,5 +9,8 @@ NOTE: Running this installer will replace all older versions of the BHoM .dlls w
 
 Copyright (c) [CopyrightHolder]
 &lt;<![CDATA[<a href="]]>[CopyrightUrl]<![CDATA[">]]>[CopyrightUrl]<![CDATA[</a>]]>&gt;</String>
-  <String Id="MaintenanceTypeDlgRepairButton">Replace</String>
+  <String Id="MaintenanceTypeDlgRepairButton">Reinstall</String>
+  <String Id="MaintenanceTypeDlgRepairText">Select this option to simply reinstall this version of the BHoM on your machine.</String>
+  <String Id="MaintenanceTypeDlgRemoveButton">Remove</String>
+  <String Id="MaintenanceTypeDlgRemoveText">This will uninstall BHoM completely from your machine, removing all plugins and BHoM toolkits.</String>
 </WixLocalization>
