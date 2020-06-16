@@ -12,7 +12,7 @@ Copyright (c) [CopyrightHolder]
   <String Id="MaintenanceTypeDlgTitle">{\WixUI_Font_Title}Reinstall or remove BHoM installation</String>
   <String Id="MaintenanceTypeDlgRepairButton">Reinstall</String>
   <String Id="MaintenanceTypeDlgRepairButtonTooltip">Reinstall BHoM</String>
-  <String Id="MaintenanceTypeDlgRepairText">Select this option to simply reinstall this version of the BHoM on your machine.</String>
+  <String Id="MaintenanceTypeDlgRepairText">Select this option to simply reinstall this particular version of the BHoM on your machine. Do note, this will restore the state of all toolkits and plugins to those included with this version of the BHoM.</String>
   <String Id="MaintenanceTypeDlgRemoveButton">Remove</String>
   <String Id="MaintenanceTypeDlgRemoveButtonTooltip">Remove BHoM</String>
   <String Id="MaintenanceTypeDlgRemoveText">This will uninstall BHoM completely from your machine, removing all plugins and BHoM toolkits.</String>
