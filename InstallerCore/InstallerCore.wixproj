@@ -71,7 +71,6 @@
     <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
   </Target>
   <Target Name="BeforeBuild">
-    <Exec WorkingDirectory="$(ProjectDir)" Command="call ..\..\BHoM_UI\Build\UI_PostBuild.exe ..\..\ C:\ProgramData\BHoM\Assemblies --onlyUpgrades" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Assemblies\* Assemblies" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Upgrades\* Upgrades" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="del Assemblies\*.dna Assemblies\*.xll Assemblies\*.gha" />
