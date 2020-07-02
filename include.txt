@@ -19,5 +19,4 @@ BHoM/RFEM_Toolkit
 BHoM/Robot_Toolkit
 BHoM/SAP2000_Toolkit
 BHoM/TAS_Toolkit
-BHoM/Versioning_Toolkit
 BHoM/XML_Toolkit
