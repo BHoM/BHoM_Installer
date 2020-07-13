@@ -3,6 +3,7 @@ BHoM/CarbonQueryDatabase_Toolkit
 BHoM/ClimateEmergency_Toolkit
 BHoM/CSharp_Toolkit
 BHoM/DIALux_Toolkit
+BHoM/EnergyPlus_Toolkit
 BHoM/ETABS_Toolkit
 BHoM/GSA_Toolkit
 BHoM/IES_Toolkit
