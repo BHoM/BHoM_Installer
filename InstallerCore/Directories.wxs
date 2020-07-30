@@ -7,6 +7,7 @@
           <Directory Id="ASSEMBLIESDIR" Name="Assemblies" />
           <Directory Id="FILESDIR" Name="Datasets" />
           <Directory Id="UPGRADESDIR" Name="Upgrades" />
+          <Directory Id="PYTHONDIR" Name="python-3.7.3-embed-amd64" />
         </Directory>
       </Directory>
 
