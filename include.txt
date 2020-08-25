@@ -22,3 +22,4 @@ BHoM/SAP2000_Toolkit
 BHoM/STL_Toolkit
 BHoM/TAS_Toolkit
 BHoM/XML_Toolkit
+BHoM/iAuditor_Toolkit
