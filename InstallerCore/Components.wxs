@@ -74,7 +74,9 @@
         <RegistryKey Root="HKCU" Key="Software\BHoM">
           <RegistryValue Name="Installer" Type="integer" Value="1"></RegistryValue>
         </RegistryKey>
-        <util:RemoveFolderEx On="both" Property="INSTALLFOLDER" />
+        <util:RemoveFolderEx On="both" Property="ASSEMBLIESDIR" />
+        <util:RemoveFolderEx On="both" Property="FILESDIR" />
+        <util:RemoveFolderEx On="both" Property="UPGRADESDIR" />
         <util:RemoveFolderEx On="both" Property="OLDINSTALLFOLDER" />
       </Component>
     </ComponentGroup>
