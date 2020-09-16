@@ -1,6 +1,7 @@
 BHoM/Revit_Toolkit/Release2018
 BHoM/Revit_Toolkit/Release2019
 BHoM/Revit_Toolkit/Release2020
+BHoM/Revit_Toolkit/Release2021
 BHoM/ETABS_Toolkit/Release16
 BHoM/ETABS_Toolkit/Release17
 BHoM/Lusas_Toolkit/Release17
