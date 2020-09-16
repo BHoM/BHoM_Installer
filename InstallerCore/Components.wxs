@@ -48,6 +48,14 @@
       </Component>
     </ComponentGroup>
 
+    <ComponentGroup Id="Revit2021" Directory="R2020DIR">
+      <Component Id="RevitAddin2021">
+        <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2021.Addin" />
+        <util:RemoveFolderEx On="install" Property="R2021BHoMFolder" />
+        <RemoveFile On="install" Id="RemoveLegacyAddin21" Name="BHoM.Addin"/>
+      </Component>
+    </ComponentGroup>
+
     <ComponentGroup Id="Dynamo">
       <Component Id="DynPkg13" Directory="DYNAMOREVIT13BHOMDIR">
         <File Source="..\..\Dynamo_Toolkit\Dynamo13\pkg.json" Id="Dynamo13pkg">

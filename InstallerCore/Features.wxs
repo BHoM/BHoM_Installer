@@ -36,6 +36,7 @@
         <ComponentGroupRef Id="Revit2018" />
         <ComponentGroupRef Id="Revit2019" />
         <ComponentGroupRef Id="Revit2020" />
+        <ComponentGroupRef Id="Revit2021" />
       </Feature>
 
       <Feature Id="DynamoPlugin" Title="Dynamo Plugin" Level="1">
