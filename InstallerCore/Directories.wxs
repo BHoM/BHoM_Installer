@@ -38,7 +38,7 @@
               <Directory Id="R2020DIR" Name="2020">
                 <Directory Id="R2020BHOMDIR" Name="BHoM" />
               </Directory>
-              <Directory Id="R2021DIR" Name="2020">
+              <Directory Id="R2021DIR" Name="2021">
                 <Directory Id="R2021BHOMDIR" Name="BHoM" />
               </Directory>
             </Directory>
