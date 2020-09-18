@@ -48,7 +48,7 @@
       </Component>
     </ComponentGroup>
 
-    <ComponentGroup Id="Revit2021" Directory="R2020DIR">
+    <ComponentGroup Id="Revit2021" Directory="R2021DIR">
       <Component Id="RevitAddin2021">
         <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2021.Addin" />
         <util:RemoveFolderEx On="install" Property="R2021BHoMFolder" />
