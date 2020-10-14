@@ -89,5 +89,53 @@
       </Component>
     </ComponentGroup>
 
+    <ComponentGroup Id="SettingsConfig" Directory="SETTINGSDIR">
+      <Component Id="REVITSETTINGSDIR">
+        <util:RemoveFolderEx On="uninstall" />
+      </Component>
+
+      <Component Id="REVITSETTINGSDIR2018">
+        <util:RemoveFolderEx On="uninstall" />
+      </Component>
+
+      <Component Id="REVITSETTINGSDIR2019">
+        <util:RemoveFolderEx On="uninstall" />
+      </Component>
+
+      <Component Id="REVITSETTINGSDIR2020">
+        <util:RemoveFolderEx On="uninstall" />
+      </Component>
+
+      <Component Id="REVITSETTINGSDIR2020">
+        <util:RemoveFolderEx On="uninstall" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="ExtensionsConfig" Directory="EXTENSIONSDIR">
+      <Component Id="PYTHONDIR">
+        <util:RemoveFolderEx On="uninstall" />
+      </Component>
+      
+      <Component Id="REVITEXTENSIONSDIR">
+        <util:RemoveFolderEx On="uninstall" />
+      </Component>
+
+      <Component Id="REVITEXTENSIONSDIR2018">
+        <util:RemoveFolderEx On="uninstall" />
+      </Component>
+
+      <Component Id="REVITEXTENSIONSDIR2019">
+        <util:RemoveFolderEx On="uninstall" />
+      </Component>
+
+      <Component Id="REVITEXTENSIONSDIR2020">
+        <util:RemoveFolderEx On="uninstall" />
+      </Component>
+
+      <Component Id="REVITEXTENSIONSDIR2021">
+        <util:RemoveFolderEx On="uninstall" />
+      </Component>
+    </ComponentGroup>
+
 	</Fragment>
 </Wix>
