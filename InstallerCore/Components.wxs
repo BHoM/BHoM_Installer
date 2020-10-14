@@ -89,53 +89,19 @@
       </Component>
     </ComponentGroup>
 
-    <ComponentGroup Id="SettingsConfig" Directory="SETTINGSDIR">
-      <Component Id="REVITSETTINGSDIR">
-        <util:RemoveFolderEx On="uninstall" />
-      </Component>
+    <ComponentGroup Id="SettingsConfig" Directory="SETTINGSDIR" />
+    <ComponentGroup Id="RevitSettingsConfig" Directory="REVITSETTINGSDIR" />
+    <ComponentGroup Id="RevitSettingsConfig2018" Directory="REVITSETTINGSDIR2018" />
+    <ComponentGroup Id="RevitSettingsConfig2019" Directory="REVITSETTINGSDIR2019" />
+    <ComponentGroup Id="RevitSettingsConfig2020" Directory="REVITSETTINGSDIR2020" />
+    <ComponentGroup Id="RevitSettingsConfig2021" Directory="REVITSETTINGSDIR2021" />
 
-      <Component Id="REVITSETTINGSDIR2018">
-        <util:RemoveFolderEx On="uninstall" />
-      </Component>
-
-      <Component Id="REVITSETTINGSDIR2019">
-        <util:RemoveFolderEx On="uninstall" />
-      </Component>
-
-      <Component Id="REVITSETTINGSDIR2020">
-        <util:RemoveFolderEx On="uninstall" />
-      </Component>
-
-      <Component Id="REVITSETTINGSDIR2020">
-        <util:RemoveFolderEx On="uninstall" />
-      </Component>
-    </ComponentGroup>
-
-    <ComponentGroup Id="ExtensionsConfig" Directory="EXTENSIONSDIR">
-      <Component Id="PYTHONDIR">
-        <util:RemoveFolderEx On="uninstall" />
-      </Component>
-      
-      <Component Id="REVITEXTENSIONSDIR">
-        <util:RemoveFolderEx On="uninstall" />
-      </Component>
-
-      <Component Id="REVITEXTENSIONSDIR2018">
-        <util:RemoveFolderEx On="uninstall" />
-      </Component>
-
-      <Component Id="REVITEXTENSIONSDIR2019">
-        <util:RemoveFolderEx On="uninstall" />
-      </Component>
-
-      <Component Id="REVITEXTENSIONSDIR2020">
-        <util:RemoveFolderEx On="uninstall" />
-      </Component>
-
-      <Component Id="REVITEXTENSIONSDIR2021">
-        <util:RemoveFolderEx On="uninstall" />
-      </Component>
-    </ComponentGroup>
+    <ComponentGroup Id="ExtensionsConfig" Directory="SETTINGSDIR" />
+    <ComponentGroup Id="RevitExtensionsConfig" Directory="REVITSETTINGSDIR" />
+    <ComponentGroup Id="RevitExtensionsConfig2018" Directory="REVITEXTENSIONSDIR2018" />
+    <ComponentGroup Id="RevitExtensionsConfig2019" Directory="REVITEXTENSIONSDIR2019" />
+    <ComponentGroup Id="RevitExtensionsConfig2020" Directory="REVITEXTENSIONSDIR2020" />
+    <ComponentGroup Id="RevitExtensionsConfig2021" Directory="REVITEXTENSIONSDIR2021" />
 
 	</Fragment>
 </Wix>
