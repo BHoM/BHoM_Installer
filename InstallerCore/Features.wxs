@@ -44,6 +44,22 @@
         <ComponentGroupRef Id="DYNAMO13" />
         <ComponentGroupRef Id="DYNAMO20" />
       </Feature>
+
+      <Feature Id="SettingsAndExtensions" Title="Settings and Extensions" Level="1">
+        <ComponentGroupRef Id="SettingsConfig" />
+        <ComponentGroupRef Id="RevitSettingsConfig" />
+        <ComponentGroupRef Id="RevitSettingsConfig2018" />
+        <ComponentGroupRef Id="RevitSettingsConfig2019" />
+        <ComponentGroupRef Id="RevitSettingsConfig2020" />
+        <ComponentGroupRef Id="RevitSettingsConfig2021" />
+
+        <ComponentGroupRef Id="ExtensionsConfig" />
+        <ComponentGroupRef Id="RevitExtensionsConfig" />
+        <ComponentGroupRef Id="RevitExtensionsConfig2018" />
+        <ComponentGroupRef Id="RevitExtensionsConfig2019" />
+        <ComponentGroupRef Id="RevitExtensionsConfig2020" />
+        <ComponentGroupRef Id="RevitExtensionsConfig2021" />
+      </Feature>
     </FeatureGroup>
 	</Fragment>
 </Wix>

@@ -89,19 +89,77 @@
       </Component>
     </ComponentGroup>
 
-    <ComponentGroup Id="SettingsConfig" Directory="SETTINGSDIR" />
-    <ComponentGroup Id="RevitSettingsConfig" Directory="REVITSETTINGSDIR" />
-    <ComponentGroup Id="RevitSettingsConfig2018" Directory="REVITSETTINGSDIR2018" />
-    <ComponentGroup Id="RevitSettingsConfig2019" Directory="REVITSETTINGSDIR2019" />
-    <ComponentGroup Id="RevitSettingsConfig2020" Directory="REVITSETTINGSDIR2020" />
-    <ComponentGroup Id="RevitSettingsConfig2021" Directory="REVITSETTINGSDIR2021" />
+    <ComponentGroup Id="SettingsConfig" Directory="SETTINGSDIR">
+      <Component Id="SettingsConfig" Guid="00380245-6e1f-4896-9e46-0d87a72f75ad">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
 
-    <ComponentGroup Id="ExtensionsConfig" Directory="SETTINGSDIR" />
-    <ComponentGroup Id="RevitExtensionsConfig" Directory="REVITSETTINGSDIR" />
-    <ComponentGroup Id="RevitExtensionsConfig2018" Directory="REVITEXTENSIONSDIR2018" />
-    <ComponentGroup Id="RevitExtensionsConfig2019" Directory="REVITEXTENSIONSDIR2019" />
-    <ComponentGroup Id="RevitExtensionsConfig2020" Directory="REVITEXTENSIONSDIR2020" />
-    <ComponentGroup Id="RevitExtensionsConfig2021" Directory="REVITEXTENSIONSDIR2021" />
+    <ComponentGroup Id="RevitSettingsConfig" Directory="REVITSETTINGSDIR">
+      <Component Id="RevitSettingsConfig" Guid="8665ac0e-edaf-44e4-a7fa-06380ac608f9">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="RevitSettingsConfig2018" Directory="REVITSETTINGSDIR2018">
+      <Component Id="RevitSettingsConfig2018" Guid="2be4f87d-f4c7-4324-b45f-cc27e72c4815">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="RevitSettingsConfig2019" Directory="REVITSETTINGSDIR2019">
+      <Component Id="RevitSettingsConfig2019" Guid="d966df84-4493-4091-bc21-8c65a0fcd581">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="RevitSettingsConfig2020" Directory="REVITSETTINGSDIR2020">
+      <Component Id="RevitSettingsConfig2020" Guid="3a68c387-b031-4aa1-affe-eb2c25d80322">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="RevitSettingsConfig2021" Directory="REVITSETTINGSDIR2021">
+      <Component Id="RevitSettingsConfig2021" Guid="9043f36a-d1fb-4b38-aecc-85c758126c3b">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="ExtensionsConfig" Directory="EXTENSIONSDIR">
+      <Component Id="ExtensionsConfig" Guid="b8cd0c91-2ebc-4bd6-ad2b-1e28fc9e6ad3">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+    
+    <ComponentGroup Id="RevitExtensionsConfig" Directory="REVITEXTENSIONSDIR">
+      <Component Id="RevitExtensionsConfig" Guid="6cf78449-1a6e-42c5-8212-9e39e85dcc59">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+    
+    <ComponentGroup Id="RevitExtensionsConfig2018" Directory="REVITEXTENSIONSDIR2018">
+      <Component Id="RevitExtensionsConfig2018" Guid="2b143a1d-0630-4a10-a040-f91e2347b353">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+    
+    <ComponentGroup Id="RevitExtensionsConfig2019" Directory="REVITEXTENSIONSDIR2019">
+      <Component Id="RevitExtensionsConfig2019" Guid="0c8902fe-bd87-4759-bce0-497a28ce5612">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+    
+    <ComponentGroup Id="RevitExtensionsConfig2020" Directory="REVITEXTENSIONSDIR2020">
+      <Component Id="RevitExtensionsConfig2020" Guid="7420bd67-66e4-42ce-a00d-59c3b9884f05">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+    
+    <ComponentGroup Id="RevitExtensionsConfig2021" Directory="REVITEXTENSIONSDIR2021">
+      <Component Id="RevitExtensionsConfig2021" Guid="e963fd78-a358-43f0-959c-243c4e77de1d">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
 
 	</Fragment>
 </Wix>
