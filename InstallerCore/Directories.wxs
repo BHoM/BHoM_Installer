@@ -7,12 +7,25 @@
           <Directory Id="ASSEMBLIESDIR" Name="Assemblies" />
           <Directory Id="FILESDIR" Name="Datasets" />
           <Directory Id="UPGRADESDIR" Name="Upgrades" />
-          <Directory Id="SETTINGSDIR" Name="Settings" />
+          <Directory Id="SETTINGSDIR" Name="Settings">
+            <Directory Id="REVITSETTINGSDIR" Name="Revit">
+              <Directory Id="REVITSETTINGSDIR2018" Name="2018" />
+              <Directory Id="REVITSETTINGSDIR2019" Name="2019" />
+              <Directory Id="REVITSETTINGSDIR2020" Name="2020" />
+              <Directory Id="REVITSETTINGSDIR2021" Name="2021" />
+            </Directory>
+          </Directory>
           <Directory Id="LOGSDIR" Name="Logs" />
           <Directory Id="EXTENSIONSDIR" Name="Extensions">
             <Directory Id="PYTHONDIR" Name="Python" />
+            <Directory Id="REVITEXTENSIONSDIR" Name="Revit">
+              <Directory Id="REVITEXTENSIONSDIR2018" Name="2018" />
+              <Directory Id="REVITEXTENSIONSDIR2019" Name="2019" />
+              <Directory Id="REVITEXTENSIONSDIR2020" Name="2020" />
+              <Directory Id="REVITEXTENSIONSDIR2021" Name="2021" />
             </Directory>
-          </Directory>
+           </Directory>
+        </Directory>
       </Directory>
 
 			<Directory Id="AppDataFolder">
