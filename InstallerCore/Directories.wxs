@@ -18,7 +18,6 @@
           <Directory Id="LOGSDIR" Name="Logs" />
           <Directory Id="EXTENSIONSDIR" Name="Extensions">
             <Directory Id="PYTHONDIR" Name="Python" />
-            
             <Directory Id="REVITEXTENSIONSDIR" Name="Revit">
               <Directory Id="REVITEXTENSIONSDIR2018" Name="2018" />              
               <Directory Id="REVITEXTENSIONSDIR2019" Name="2019" />
@@ -26,6 +25,10 @@
               <Directory Id="REVITEXTENSIONSDIR2021" Name="2021" />
             </Directory>
            </Directory>
+
+          <Directory Id="RESOURCESDIR" Name="Resources">
+            <Directory Id="REVITRESOURCESDIR" Name="Revit" />
+          </Directory>
         </Directory>
       </Directory>
 
