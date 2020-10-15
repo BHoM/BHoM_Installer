@@ -160,18 +160,5 @@
         <CreateFolder />
       </Component>
     </ComponentGroup>
-
-    <ComponentGroup Id="ResourcesConfig" Directory="RESOURCESDIR">
-      <Component Id="ResourcesConfig" Guid="922ede0a-a035-41e4-adb1-642992cc756a">
-        <CreateFolder />
-      </Component>
-    </ComponentGroup>
-
-    <ComponentGroup Id="RevitResourcesConfig" Directory="REVITRESOURCESDIR">
-      <Component Id="RevitResourcesConfig" Guid="d08d998a-bcc3-41b4-9378-7f439e09b5af">
-        <CreateFolder />
-      </Component>
-    </ComponentGroup>
-
 	</Fragment>
 </Wix>
