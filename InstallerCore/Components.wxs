@@ -80,7 +80,9 @@
         <util:RemoveFolderEx On="both" Property="UPGRADESDIR" />
         <util:RemoveFolderEx On="both" Property="OLDINSTALLFOLDER" />
         <util:RemoveFolderEx On="both" Property="DYNAMOCORE13BHOMDIR"/>
+        <util:RemoveFolderEx On="both" Property="DYNC13BHOMDIR"/>
         <util:RemoveFolderEx On="both" Property="DYNAMOREVIT13BHOMDIR"/>
+        <util:RemoveFolderEx On="both" Property="DYNR13BHOMDIR"/>
       </Component>
     </ComponentGroup>
 
