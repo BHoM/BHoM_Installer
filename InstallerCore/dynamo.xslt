@@ -15,20 +15,6 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match='wix:Wix/wix:Fragment/wix:ComponentGroup/wix:Component[@Directory="DYNC13BHOMDIR"]/wix:File'>
-    <xsl:copy>
-      <xsl:apply-templates select="@*"/>
-      <xsl:element name="wix:CopyFile">
-        <xsl:attribute name="Id">
-          <xsl:text>CpyDYNR13_</xsl:text>
-          <xsl:value-of select="generate-id()"/>
-        </xsl:attribute>
-        <xsl:attribute name="DestinationDirectory">
-          <xsl:text>DYNR13BHOMDIR</xsl:text>
-        </xsl:attribute>
-      </xsl:element>
-    </xsl:copy>
-  </xsl:template>
   <xsl:template match='wix:Wix/wix:Fragment/wix:ComponentGroup/wix:Component[@Directory="DYNC20BHOMDIR"]/wix:File'>
     <xsl:copy>
       <xsl:apply-templates select="@*"/>
