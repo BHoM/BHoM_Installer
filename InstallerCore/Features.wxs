@@ -62,5 +62,11 @@
         <ComponentGroupRef Id="RevitExtensionsConfig2021" />
       </Feature>
     </FeatureGroup>
+
+    <Feature Id="Resources" Title="Resources" Level="1">
+      <ComponentGroupRef Id="RESOURCES" />
+      <ComponentGroupRef Id="ResourcesConfig" />
+      <ComponentGroupRef Id="RevitResourcesConfig" />
+    </Feature>
 	</Fragment>
 </Wix>
