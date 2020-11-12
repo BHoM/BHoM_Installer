@@ -44,17 +44,11 @@
           <xsl:text>CpyDYNR23__</xsl:text>
           <xsl:value-of select="generate-id()"/>
         </xsl:attribute>
-        <xsl:attribute name="DestinationDirectory">
-          <xsl:text>DYNR23BHOMDIR</xsl:text>
-        </xsl:attribute>
       </xsl:element>
       <xsl:element name="wix:CopyFile">
         <xsl:attribute name="Id">
           <xsl:text>CpyDYNC23__</xsl:text>
           <xsl:value-of select="generate-id()"/>
-        </xsl:attribute>
-        <xsl:attribute name="DestinationDirectory">
-          <xsl:text>DYNC23BHOMDIR</xsl:text>
         </xsl:attribute>
       </xsl:element>
     </xsl:copy>
