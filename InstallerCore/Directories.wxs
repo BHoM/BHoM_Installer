@@ -75,6 +75,7 @@
               <Directory Id="DYNAMOCORE20PKGDIR" Name="packages" >
                 <Directory Id="DYNAMOCORE20BHOMDIR" Name="BHoM" >
                   <Directory Id="DYNC20BHOMDIR" Name="bin" />
+                  <Directory Id="DYNC20BHOMDIREXTRA" Name="extra" />
                 </Directory>
               </Directory>
             </Directory>
@@ -82,6 +83,7 @@
               <Directory Id="DYNAMOCORE23PKGDIR" Name="packages" >
                 <Directory Id="DYNAMOCORE23BHOMDIR" Name="BHoM" >
                   <Directory Id="DYNC23BHOMDIR" Name="bin" />
+                  <Directory Id="DYNC23BHOMDIREXTRA" Name="extra" />
                 </Directory>
               </Directory>
             </Directory>
@@ -98,6 +100,7 @@
               <Directory Id="DYNAMOREVIT20PKGDIR" Name="packages" >
                 <Directory Id="DYNAMOREVIT20BHOMDIR" Name="BHoM" >
                   <Directory Id="DYNR20BHOMDIR" Name="bin" />
+                  <Directory Id="DYNR20BHOMDIREXTRA" Name="extra" />
                 </Directory>
               </Directory>
             </Directory>
@@ -105,6 +108,7 @@
               <Directory Id="DYNAMOREVIT23PKGDIR" Name="packages" >
                 <Directory Id="DYNAMOREVIT23BHOMDIR" Name="BHoM" >
                   <Directory Id="DYNR23BHOMDIR" Name="bin" />
+                  <Directory Id="DYNR23BHOMDIREXTRA" Name="extra" />
                 </Directory>
               </Directory>
             </Directory>
