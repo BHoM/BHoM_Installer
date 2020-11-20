@@ -68,6 +68,19 @@
         <util:RemoveFolderEx On="both" Property="DYNAMOCORE23BHOMDIR" />
         <util:RemoveFolderEx On="both" Property="DYNAMOREVIT23BHOMDIR" />
       </Component>
+
+      <Component Id="DynView20" Directory="DYNAMOREVIT20BHOMDIR">
+        <File Source="..\..\Dynamo_Toolkit\Dynamo20\BHoM_ViewExtensionDefinition.xml" Id="Dynamo20ViewPkg">
+          <CopyFile Id="CpyDynamo20View" DestinationDirectory="DYNC20BHOMDIREXTRA"/>
+          <CopyFile Id="CpyDynamo23View" DestinationDirectory="DYNC23BHOMDIREXTRA"/>
+          <CopyFile Id="CpyDynamoR20View" DestinationDirectory="DYNR20BHOMDIREXTRA"/>
+          <CopyFile Id="CpyDynamoR23View" DestinationDirectory="DYNR23BHOMDIREXTRA"/>
+        </File>
+        <util:RemoveFolderEx On="both" Property="DYNC20BHOMDIREXTRA" />
+        <util:RemoveFolderEx On="both" Property="DYNC23BHOMDIREXTRA" />
+        <util:RemoveFolderEx On="both" Property="DYNR20BHOMDIREXTRA" />
+        <util:RemoveFolderEx On="both" Property="DYNR23BHOMDIREXTRA" />
+      </Component>
     </ComponentGroup>
 
     <ComponentGroup Id="Core" Directory="INSTALLFOLDER">
