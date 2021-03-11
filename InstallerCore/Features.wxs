@@ -68,5 +68,10 @@
       <ComponentGroupRef Id="ResourcesConfig" />
       <ComponentGroupRef Id="RevitResourcesConfig" />
     </Feature>
+
+    <InstallExecuteSequence>
+      <Custom Action="Action_EditDynamo23SettingsXML" Before="InstallFinalize" />
+    </InstallExecuteSequence>
+    
 	</Fragment>
 </Wix>

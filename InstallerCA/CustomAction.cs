@@ -37,6 +37,59 @@ namespace InstallerCA
     {
         #region Methods
 
+        #region CaEditDynamoSettings23.xml
+        [CustomAction]
+        public static ActionResult CaEditDynamoSettings23XMLFile(Session session)
+        {
+            try
+            {
+                List<string> targetFolders = new List<string>();
+                targetFolders.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dynamo", "Dynamo Core", "2.3"));
+                targetFolders.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dynamo", "Dynamo Revit", "2.3"));
+
+                foreach (string targetFolder in targetFolders)
+                {
+                    string targetFile = Path.Combine(targetFolder, "DynamoSettings.xml");
+                    string templateFile = @"C:\ProgramData\BHoM\Assemblies";
+
+                    if (File.Exists(targetFile))
+                    {
+                        List<string> lines = File.ReadAllLines(targetFile).ToList();
+
+                        int index = lines.FindIndex(x => x.Contains("<CustomPackageFolders>"));
+                        if (index > 0)
+                        {
+                            int endIndex = lines.FindIndex(x => x.Contains("</CustomPackageFolders>"));
+                            if (endIndex > 0)
+                            {
+                                bool alreadyHasItem = false;
+                                for (int x = index; x < endIndex; x++)
+                                {
+                                    if (lines[x].Contains(templateFile))
+                                    {
+                                        alreadyHasItem = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyHasItem)
+                                {
+                                    lines.Insert(endIndex, $"    <string>{templateFile}</string>");
+                                }
+                                File.WriteAllLines(targetFile, lines);
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            return ActionResult.Success;
+        }
+
+
+        #endregion
+
         #region CaRegisterAddIn
         [CustomAction]
         public static ActionResult CaRegisterAddIn(Session session)
