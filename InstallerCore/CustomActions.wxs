@@ -19,6 +19,8 @@
     <CustomAction Id="Action_UnRegisterAddInOld.SetProperty" Return="check" Property="Action_UnRegisterAddInOld" Value="FOLDER=[OLDASSEMBLIESDIR];OFFICEREGKEYS=[OFFICEREGKEYS];XLL32=[XLL32];XLL64=[XLL64]" />
     <CustomAction Id="Action_UnRegisterAddInOld" BinaryKey="InstallerCA.CA.dll" DllEntry="CaUnRegisterAddIn" Return="ignore" Execute="deferred" />
 
+    <CustomAction Id="Action_EditDynamo23SettingsXML" BinaryKey="InstallerCA.CA.dll" DllEntry="CaEditDynamoSettings23XMLFile" Return="check" Execute="commit" />
+
     <CustomAction Id="Action_CloseAppsPrompt" BinaryKey="InstallerCA.CA.dll" DllEntry="ClosePrompt" Return="check" />
 
     <SetProperty Id="GHBHoMFolder" Value="[GHBHOMDIR]" Before="CostInitialize" />
