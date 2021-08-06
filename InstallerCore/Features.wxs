@@ -23,6 +23,7 @@
         <ComponentGroupRef Id="PYTHON" />
         <ComponentGroupRef Id="MACHINELEARNING" />
         <ComponentGroupRef Id="IES" />
+        <ComponentGroupRef Id="CFD"/>
         <ComponentGroupRef Id="Core" />
       </Feature>
 
