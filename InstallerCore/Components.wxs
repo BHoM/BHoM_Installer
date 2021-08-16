@@ -56,6 +56,14 @@
       </Component>
     </ComponentGroup>
 
+    <ComponentGroup Id="Revit2022" Directory="R2022DIR">
+      <Component Id="RevitAddin2022">
+        <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2022.Addin" />
+        <util:RemoveFolderEx On="install" Property="R2022BHoMFolder" />
+        <RemoveFile On="install" Id="RemoveLegacyAddin22" Name="BHoM.Addin"/>
+      </Component>
+    </ComponentGroup>
+
     <ComponentGroup Id="Dynamo">
       <Component Id="DynPkg20" Directory="DYNAMOREVIT20BHOMDIR">
         <File Source="..\..\Dynamo_Toolkit\Dynamo20\pkg.json" Id="Dynamo20pkg">
@@ -136,6 +144,12 @@
       </Component>
     </ComponentGroup>
 
+    <ComponentGroup Id="RevitSettingsConfig2022" Directory="REVITSETTINGSDIR2022">
+      <Component Id="RevitSettingsConfig2022" Guid="81ca731c-6965-451a-9706-416db6231350">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+
     <ComponentGroup Id="ExtensionsConfig" Directory="EXTENSIONSDIR">
       <Component Id="ExtensionsConfig" Guid="b8cd0c91-2ebc-4bd6-ad2b-1e28fc9e6ad3">
         <CreateFolder />
@@ -168,6 +182,12 @@
 
     <ComponentGroup Id="RevitExtensionsConfig2021" Directory="REVITEXTENSIONSDIR2021">
       <Component Id="RevitExtensionsConfig2021" Guid="e963fd78-a358-43f0-959c-243c4e77de1d">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="RevitExtensionsConfig2022" Directory="REVITEXTENSIONSDIR2022">
+      <Component Id="RevitExtensionsConfig2022" Guid="b325b038-fcea-48df-819d-eb40d44f3733">
         <CreateFolder />
       </Component>
     </ComponentGroup>
