@@ -15,6 +15,9 @@
       <Component Id="DNA64" Guid="*">
         <File Source="..\..\Excel_Toolkit\Build\BHoM-AddIn64.dna" />
       </Component>
+    <Component Id="EXCELTLB" Guid="*">
+        <File Source="..\..\Excel_Toolkit\Build\Excel_UI.tlb" />
+      </Component>
     </ComponentGroup>
 
     <ComponentGroup Id="Grasshopper" Directory="ASSEMBLIESDIR">
