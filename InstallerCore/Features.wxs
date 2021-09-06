@@ -40,6 +40,7 @@
         <ComponentGroupRef Id="Revit2019" />
         <ComponentGroupRef Id="Revit2020" />
         <ComponentGroupRef Id="Revit2021" />
+        <ComponentGroupRef Id="Revit2022" />
       </Feature>
 
       <Feature Id="DynamoPlugin" Title="Dynamo Plugin" Level="1">
@@ -54,6 +55,7 @@
         <ComponentGroupRef Id="RevitSettingsConfig2019" />
         <ComponentGroupRef Id="RevitSettingsConfig2020" />
         <ComponentGroupRef Id="RevitSettingsConfig2021" />
+        <ComponentGroupRef Id="RevitSettingsConfig2022" />
       </Feature>
 
       <Feature Id="Extensions" Title="Extensions" Level="1">
@@ -63,6 +65,7 @@
         <ComponentGroupRef Id="RevitExtensionsConfig2019" />
         <ComponentGroupRef Id="RevitExtensionsConfig2020" />
         <ComponentGroupRef Id="RevitExtensionsConfig2021" />
+        <ComponentGroupRef Id="RevitExtensionsConfig2022" />
       </Feature>
     </FeatureGroup>
 
