@@ -110,6 +110,7 @@
     <ComponentGroup Id="SettingsConfig" Directory="SETTINGSDIR">
       <Component Id="SettingsConfig" Guid="00380245-6e1f-4896-9e46-0d87a72f75ad">
         <File Source="..\Settings\IncludedDLLs.txt" />
+        <File Source="..\Settings\IncludedDatasets.txt" />
       </Component>
     </ComponentGroup>
 
