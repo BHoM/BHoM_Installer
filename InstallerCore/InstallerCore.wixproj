@@ -13,20 +13,22 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgrades;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;PythonDir=..\..\BHoM_Installer\InstallerCore\Extensions\Python;ResourcesDir=..\..\BHoM_Installer\InstallerCore\Resources;MachineLearningExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\MachineLearning;IESExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\IES;CFDExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\CFD</DefineConstants>
+    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgrades;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;PythonDir=..\..\BHoM_Installer\InstallerCore\Extensions\Python;ResourcesDir=..\..\BHoM_Installer\InstallerCore\Resources;MachineLearningExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\MachineLearning;IESExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\IES;CFDExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\CFD;PythonCodeDir=..\..\BHoM_Installer\InstallerCore\Extensions\PythonCode</DefineConstants>
     <VerboseOutput>False</VerboseOutput>
     <LibBindFiles>False</LibBindFiles>
     <SuppressAllWarnings>False</SuppressAllWarnings>
     <Pedantic>False</Pedantic>
+    <RunWixToolsOutOfProc Condition=" '$(PROCESSOR_ARCHITECTURE)'!='x86' ">true</RunWixToolsOutOfProc>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <WixVariables>
     </WixVariables>
-    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgrades;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;PythonDir=..\..\BHoM_Installer\InstallerCore\Extensions\Python;MachineLearningExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\MachineLearning;IESExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\IES;CFDExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\CFD</DefineConstants>
+    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgrades;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;Dynamo20Dir=..\..\BHoM_Installer\InstallerCore\Dynamo20;PythonDir=..\..\BHoM_Installer\InstallerCore\Extensions\Python;MachineLearningExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\MachineLearning;IESExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\IES;CFDExtensionsDir=..\..\BHoM_Installer\InstallerCore\Extensions\CFD;PythonCodeDir=..\..\BHoM_Installer\InstallerCore\Extensions\PythonCode</DefineConstants>
     <SuppressAllWarnings>False</SuppressAllWarnings>
     <Pedantic>False</Pedantic>
+    <RunWixToolsOutOfProc Condition=" '$(PROCESSOR_ARCHITECTURE)'!='x86' ">true</RunWixToolsOutOfProc>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Components.wxs" />
@@ -79,17 +81,19 @@
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Extensions\MachineLearning Extensions\MachineLearning" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Extensions\IES Extensions\IES" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Extensions\CFD Extensions\CFD" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Extensions\PythonCode\* Extensions\PythonCode" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E ..\..\Dynamo_Toolkit\Dynamo20\Build\*.dll Dynamo20" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E /C $(ALLUSERSPROFILE)\BHoM\Resources\* Resources" />
-    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_resources.wxs" DirectoryRefId="RESOURCESDIR" Directory="$(ProjectDir)Resources" ComponentGroupName="RESOURCES" PreprocessorVariable="var.ResourcesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" />
-    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_assemblies.wxs" DirectoryRefId="ASSEMBLIESDIR" Directory="$(ProjectDir)Assemblies" ComponentGroupName="ASSEMBLIES" PreprocessorVariable="var.FilesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" Transforms="$(ProjectDir)assemblies.xslt" />
-    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_datasets.wxs" DirectoryRefId="FILESDIR" Directory="$(ProjectDir)DataSets" ComponentGroupName="DATA" PreprocessorVariable="var.DataDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" />
-    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_upgrades.wxs" DirectoryRefId="UPGRADESDIR" Directory="$(ProjectDir)Upgrades" ComponentGroupName="UPGRADES" PreprocessorVariable="var.UpgradesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" />
-    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_dyn20assemblies.wxs" DirectoryRefId="DYNC20BHOMDIR" Directory="$(ProjectDir)Dynamo20" ComponentGroupName="DYNAMO20" PreprocessorVariable="var.Dynamo20Dir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" Transforms="$(ProjectDir)dynamo.xslt" />
-    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_python.wxs" DirectoryRefId="PYTHONDIR" Directory="$(ProjectDir)Extensions\Python" ComponentGroupName="PYTHON" PreprocessorVariable="var.PythonDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" />
-    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_machinelearning.wxs" DirectoryRefId="MACHINELEARNINGEXTENSIONSDIR" Directory="$(ProjectDir)Extensions\MachineLearning" ComponentGroupName="MACHINELEARNING" PreprocessorVariable="var.MachineLearningExtensionsDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" />
-    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_ies.wxs" DirectoryRefId="IESEXTENSIONSDIR" Directory="$(ProjectDir)Extensions\IES" ComponentGroupName="IES" PreprocessorVariable="var.IESExtensionsDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" />
-     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_cfd.wxs" DirectoryRefId="CFDEXTENSIONSDIR" Directory="$(ProjectDir)Extensions\CFD" ComponentGroupName="CFD" PreprocessorVariable="var.CFDExtensionsDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" />
+    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_resources.wxs" DirectoryRefId="RESOURCESDIR" Directory="$(ProjectDir)Resources" ComponentGroupName="RESOURCES" PreprocessorVariable="var.ResourcesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
+    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_assemblies.wxs" DirectoryRefId="ASSEMBLIESDIR" Directory="$(ProjectDir)Assemblies" ComponentGroupName="ASSEMBLIES" PreprocessorVariable="var.FilesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" Transforms="$(ProjectDir)assemblies.xslt" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
+    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_datasets.wxs" DirectoryRefId="FILESDIR" Directory="$(ProjectDir)DataSets" ComponentGroupName="DATA" PreprocessorVariable="var.DataDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
+    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_upgrades.wxs" DirectoryRefId="UPGRADESDIR" Directory="$(ProjectDir)Upgrades" ComponentGroupName="UPGRADES" PreprocessorVariable="var.UpgradesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
+    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_dyn20assemblies.wxs" DirectoryRefId="DYNC20BHOMDIR" Directory="$(ProjectDir)Dynamo20" ComponentGroupName="DYNAMO20" PreprocessorVariable="var.Dynamo20Dir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" Transforms="$(ProjectDir)dynamo.xslt" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
+    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_python.wxs" DirectoryRefId="PYTHONDIR" Directory="$(ProjectDir)Extensions\Python" ComponentGroupName="PYTHON" PreprocessorVariable="var.PythonDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
+    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_machinelearning.wxs" DirectoryRefId="MACHINELEARNINGEXTENSIONSDIR" Directory="$(ProjectDir)Extensions\MachineLearning" ComponentGroupName="MACHINELEARNING" PreprocessorVariable="var.MachineLearningExtensionsDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
+    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_ies.wxs" DirectoryRefId="IESEXTENSIONSDIR" Directory="$(ProjectDir)Extensions\IES" ComponentGroupName="IES" PreprocessorVariable="var.IESExtensionsDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
+     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_cfd.wxs" DirectoryRefId="CFDEXTENSIONSDIR" Directory="$(ProjectDir)Extensions\CFD" ComponentGroupName="CFD" PreprocessorVariable="var.CFDExtensionsDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
+     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_pythoncode.wxs" DirectoryRefId="PYTHONCODEDIR" Directory="$(ProjectDir)Extensions\PythonCode" ComponentGroupName="PythonCode" PreprocessorVariable="var.PythonCodeDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
     <ItemGroup>
       <Compile Include="$(IntermediateOutputPath)_assemblies.wxs" />
       <Compile Include="$(IntermediateOutputPath)_datasets.wxs" />
@@ -99,6 +103,7 @@
       <Compile Include="$(IntermediateOutputPath)_machinelearning.wxs" />
       <Compile Include="$(IntermediateOutputPath)_ies.wxs" />
       <Compile Include="$(IntermediateOutputPath)_cfd.wxs" />
+      <Compile Include="$(IntermediateOutputPath)_pythoncode.wxs" />
       <Compile Include="$(IntermediateOutputPath)_resources.wxs" />
     </ItemGroup>
   </Target>

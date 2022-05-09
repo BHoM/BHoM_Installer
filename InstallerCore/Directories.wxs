@@ -22,6 +22,7 @@
             <Directory Id="MACHINELEARNINGEXTENSIONSDIR" Name="MachineLearning" />
             <Directory Id="IESEXTENSIONSDIR" Name="IES" />
             <Directory Id="CFDEXTENSIONSDIR" Name="CFD" />
+            <Directory Id="PYTHONCODEDIR" Name="PythonCode" />
             <Directory Id="REVITEXTENSIONSDIR" Name="Revit">
               <Directory Id="REVITEXTENSIONSDIR2018" Name="2018" />              
               <Directory Id="REVITEXTENSIONSDIR2019" Name="2019" />
