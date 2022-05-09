@@ -8,6 +8,7 @@
           <Directory Id="FILESDIR" Name="Datasets" />
           <Directory Id="UPGRADESDIR" Name="Upgrades" />
           <Directory Id="SETTINGSDIR" Name="Settings">
+            <Directory Id="PYTHONSETTINGSDIR" Name="Python" />
             <Directory Id="REVITSETTINGSDIR" Name="Revit">
               <Directory Id="REVITSETTINGSDIR2018" Name="2018" />
               <Directory Id="REVITSETTINGSDIR2019" Name="2019" />
