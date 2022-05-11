@@ -19,10 +19,6 @@
           </Directory>
           <Directory Id="LOGSDIR" Name="Logs" />
           <Directory Id="EXTENSIONSDIR" Name="Extensions">
-            <Directory Id="PYTHONDIR" Name="Python" />
-            <Directory Id="MACHINELEARNINGEXTENSIONSDIR" Name="MachineLearning" />
-            <Directory Id="IESEXTENSIONSDIR" Name="IES" />
-            <Directory Id="CFDEXTENSIONSDIR" Name="CFD" />
             <Directory Id="PYTHONCODEDIR" Name="PythonCode" />
             <Directory Id="REVITEXTENSIONSDIR" Name="Revit">
               <Directory Id="REVITEXTENSIONSDIR2018" Name="2018" />              

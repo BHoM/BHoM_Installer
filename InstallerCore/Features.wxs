@@ -20,10 +20,6 @@
         <ComponentGroupRef Id="ASSEMBLIES" />
         <ComponentGroupRef Id="UPGRADES" />
         <ComponentGroupRef Id="DATA" />
-        <ComponentGroupRef Id="PYTHON" />
-        <ComponentGroupRef Id="MACHINELEARNING" />
-        <ComponentGroupRef Id="IES" />
-        <ComponentGroupRef Id="CFD"/>
         <ComponentGroupRef Id="PYTHONCODE"/>
         <ComponentGroupRef Id="Core" />
       </Feature>
