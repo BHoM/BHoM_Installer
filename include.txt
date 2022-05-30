@@ -1,7 +1,6 @@
 BHoM/BHoM_Datasets
 BHoM/CarbonQueryDatabase_Toolkit
 BHoM/ClimateEmergency_Toolkit
-BHoM/DIALux_Toolkit
 BHoM/EnergyPlus_Toolkit
 BHoM/ETABS_Toolkit
 BHoM/File_Toolkit
@@ -20,6 +19,5 @@ BHoM/RFEM_Toolkit
 BHoM/Robot_Toolkit
 BHoM/SAP2000_Toolkit
 BHoM/STL_Toolkit
-BHoM/TAS_Toolkit
 BHoM/XML_Toolkit
 BHoM/iAuditor_Toolkit
