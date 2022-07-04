@@ -1,4 +1,4 @@
-BHoM/Grasshopper_Toolkit
-BHoM/Dynamo_Toolkit
-BHoM/Excel_Toolkit
+BHoM/Grasshopper_UI
+BHoM/Dynamo_UI
+BHoM/Excel_UI
 BHoM/Versioning_Toolkit
