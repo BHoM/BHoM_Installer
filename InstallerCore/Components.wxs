@@ -4,22 +4,22 @@
 
     <ComponentGroup Id="Excel" Directory="ASSEMBLIESDIR">
       <Component Id="XLL32" Guid="*">
-        <File Source="..\..\Excel_Toolkit\Build\BHoM-AddIn.xll" />
+        <File Source="..\..\Excel_UI\Build\BHoM-AddIn.xll" />
       </Component>
       <Component Id="XLL64" Guid="*">
-        <File Source="..\..\Excel_Toolkit\Build\BHoM-AddIn64.xll" />
+        <File Source="..\..\Excel_UI\Build\BHoM-AddIn64.xll" />
       </Component>
       <Component Id="DNA32" Guid="*">
-        <File Source="..\..\Excel_Toolkit\Build\BHoM-AddIn.dna" />
+        <File Source="..\..\Excel_UI\Build\BHoM-AddIn.dna" />
       </Component>
       <Component Id="DNA64" Guid="*">
-        <File Source="..\..\Excel_Toolkit\Build\BHoM-AddIn64.dna" />
+        <File Source="..\..\Excel_UI\Build\BHoM-AddIn64.dna" />
       </Component>
     </ComponentGroup>
 
     <ComponentGroup Id="Grasshopper" Directory="ASSEMBLIESDIR">
       <Component Id="GHA" Guid="{A1EE1994-996D-4AF2-B61E-DA5C910534CC}">
-        <File KeyPath="yes" Source="..\..\Grasshopper_Toolkit\Build\BH.UI.Grasshopper.dll" Name="BH.UI.Grasshopper.gha" />
+        <File KeyPath="yes" Source="..\..\Grasshopper_UI\Build\BH.UI.Grasshopper.dll" Name="BH.UI.Grasshopper.gha" />
         <util:RemoveFolderEx On="install" Property="GHBHoMFolder" />
       </Component>
     </ComponentGroup>
@@ -66,7 +66,7 @@
 
     <ComponentGroup Id="Dynamo">
       <Component Id="DynPkg20" Directory="DYNAMOREVIT20BHOMDIR">
-        <File Source="..\..\Dynamo_Toolkit\Dynamo20\pkg.json" Id="Dynamo20pkg">
+        <File Source="..\..\Dynamo_UI\Dynamo20\pkg.json" Id="Dynamo20pkg">
           <CopyFile Id="CpyDynamo20Pkg" DestinationDirectory="DYNAMOCORE20BHOMDIR" />
           <CopyFile Id="CpyDynamo23Pkg" DestinationDirectory="DYNAMOCORE23BHOMDIR" />
           <CopyFile Id="CpyDynamoR23Pkg" DestinationDirectory="DYNAMOREVIT23BHOMDIR" />
@@ -78,7 +78,7 @@
       </Component>
 
       <Component Id="DynView20" Directory="DYNAMOREVIT20BHOMDIR">
-        <File Source="..\..\Dynamo_Toolkit\Dynamo20\BHoM_ViewExtensionDefinition.xml" Id="Dynamo20ViewPkg">
+        <File Source="..\..\Dynamo_UI\Dynamo20\BHoM_ViewExtensionDefinition.xml" Id="Dynamo20ViewPkg">
           <CopyFile Id="CpyDynamo20View" DestinationDirectory="DYNC20BHOMDIREXTRA"/>
           <CopyFile Id="CpyDynamo23View" DestinationDirectory="DYNC23BHOMDIREXTRA"/>
           <CopyFile Id="CpyDynamoR20View" DestinationDirectory="DYNR20BHOMDIREXTRA"/>
