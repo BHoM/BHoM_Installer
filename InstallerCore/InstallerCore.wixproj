@@ -79,7 +79,7 @@
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Datasets DataSets" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Extensions\PythonCode\* Extensions\PythonCode" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Settings\Python\* Settings\Python" />
-    <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E ..\..\Dynamo_Toolkit\Dynamo20\Build\*.dll Dynamo20" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E ..\..\Dynamo_UI\Dynamo20\Build\*.dll Dynamo20" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E /C $(ALLUSERSPROFILE)\BHoM\Resources\* Resources" />
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_resources.wxs" DirectoryRefId="RESOURCESDIR" Directory="$(ProjectDir)Resources" ComponentGroupName="RESOURCES" PreprocessorVariable="var.ResourcesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_assemblies.wxs" DirectoryRefId="ASSEMBLIESDIR" Directory="$(ProjectDir)Assemblies" ComponentGroupName="ASSEMBLIES" PreprocessorVariable="var.FilesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" Transforms="$(ProjectDir)assemblies.xslt" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
