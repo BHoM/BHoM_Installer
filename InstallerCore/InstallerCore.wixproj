@@ -93,8 +93,6 @@
       <Compile Include="$(IntermediateOutputPath)_datasets.wxs" />
       <Compile Include="$(IntermediateOutputPath)_upgrades.wxs" />
       <Compile Include="$(IntermediateOutputPath)_dyn20assemblies.wxs" />
-      <Compile Include="$(IntermediateOutputPath)_pythoncode.wxs" />
-      <Compile Include="$(IntermediateOutputPath)_pythonsettings.wxs" />
       <Compile Include="$(IntermediateOutputPath)_resources.wxs" />
     </ItemGroup>
   </Target>
