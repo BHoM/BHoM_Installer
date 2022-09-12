@@ -20,7 +20,6 @@
         <ComponentGroupRef Id="ASSEMBLIES" />
         <ComponentGroupRef Id="UPGRADES" />
         <ComponentGroupRef Id="DATA" />
-        <ComponentGroupRef Id="PYTHONCODE"/>
         <ComponentGroupRef Id="Core" />
       </Feature>
 
@@ -47,7 +46,6 @@
 
       <Feature Id="Settings" Title="Settings" Level="1">
         <ComponentGroupRef Id="SettingsConfig" />
-        <ComponentGroupRef Id="PYTHONSETTINGS" />
         <ComponentGroupRef Id="RevitSettingsConfig" />
         <ComponentGroupRef Id="RevitSettingsConfig2018" />
         <ComponentGroupRef Id="RevitSettingsConfig2019" />
