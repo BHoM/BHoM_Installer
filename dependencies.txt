@@ -1,8 +1,3 @@
-BHoM/BHoM
-BHoM/BHoM_Engine
-BHoM/BHoM_Adapter
-BHoM/CSharp_Toolkit
-BHoM/BHoM_UI
 BHoM/Socket_Toolkit
 BHoM/TriangleNet_Toolkit
 BHoM/Clipper_Toolkit
@@ -10,5 +5,4 @@ BHoM/HTTP_Toolkit
 BHoM/Localisation_Toolkit
 BHoM/Rhinoceros_Toolkit
 BHoM/Python_Toolkit
-BHoM/MachineLearning_Toolkit
 BHoM/Excel_Toolkit
