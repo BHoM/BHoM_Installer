@@ -9,10 +9,11 @@ BHoM/IES_Toolkit
 BHoM/LadybugTools_Toolkit
 BHoM/LifeCycleAssessment_Toolkit
 BHoM/Lusas_Toolkit
+BHoM/MachineLearning_Toolkit
 BHoM/MidasCivil_Toolkit
 BHoM/Mongo_Toolkit
-BHoM/Psychrometrics_Toolkit
 BHoM/OpenStreetMap_Toolkit
+BHoM/Psychrometrics_Toolkit
 BHoM/RAM_Toolkit
 BHoM/Revit_Toolkit
 BHoM/RFEM_Toolkit
