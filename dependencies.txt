@@ -1,8 +1,9 @@
-BHoM/Socket_Toolkit
-BHoM/TriangleNet_Toolkit
 BHoM/Clipper_Toolkit
+BHoM/Excel_Toolkit
 BHoM/HTTP_Toolkit
 BHoM/Localisation_Toolkit
-BHoM/Rhinoceros_Toolkit
+BHoM/Psychrometrics_Toolkit
 BHoM/Python_Toolkit
-BHoM/Excel_Toolkit
+BHoM/Rhinoceros_Toolkit
+BHoM/Socket_Toolkit
+BHoM/TriangleNet_Toolkit
