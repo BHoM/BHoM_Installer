@@ -85,11 +85,13 @@
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_datasets.wxs" DirectoryRefId="FILESDIR" Directory="$(ProjectDir)DataSets" ComponentGroupName="DATA" PreprocessorVariable="var.DataDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_upgrades.wxs" DirectoryRefId="UPGRADESDIR" Directory="$(ProjectDir)Upgrades" ComponentGroupName="UPGRADES" PreprocessorVariable="var.UpgradesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_dyn20assemblies.wxs" DirectoryRefId="DYNC20BHOMDIR" Directory="$(ProjectDir)Dynamo20" ComponentGroupName="DYNAMO20" PreprocessorVariable="var.Dynamo20Dir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" Transforms="$(ProjectDir)dynamo.xslt" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
+    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_pythoncode.wxs" DirectoryRefId="PYTHONCODEDIR" Directory="$(ProjectDir)Extensions\PythonCode" ComponentGroupName="PYTHONCODE" PreprocessorVariable="var.PythonCodeDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
     <ItemGroup>
       <Compile Include="$(IntermediateOutputPath)_assemblies.wxs" />
       <Compile Include="$(IntermediateOutputPath)_datasets.wxs" />
       <Compile Include="$(IntermediateOutputPath)_upgrades.wxs" />
       <Compile Include="$(IntermediateOutputPath)_dyn20assemblies.wxs" />
+      <Compile Include="$(IntermediateOutputPath)_pythoncode.wxs" />
       <Compile Include="$(IntermediateOutputPath)_resources.wxs" />
     </ItemGroup>
   </Target>
