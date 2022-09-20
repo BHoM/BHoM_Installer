@@ -21,6 +21,7 @@
         <ComponentGroupRef Id="UPGRADES" />
         <ComponentGroupRef Id="DATA" />
         <ComponentGroupRef Id="Core" />
+        <ComponentGroupRef Id="PYTHONCODE"/>
       </Feature>
 
       <Feature Id="ExcelFeature" Title="Excel Plugin" Level="1">
