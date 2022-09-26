@@ -15,6 +15,7 @@
               <Directory Id="REVITSETTINGSDIR2020" Name="2020" />
               <Directory Id="REVITSETTINGSDIR2021" Name="2021" />
               <Directory Id="REVITSETTINGSDIR2022" Name="2022" />
+              <Directory Id="REVITSETTINGSDIR2023" Name="2023" />
             </Directory>
           </Directory>
           <Directory Id="LOGSDIR" Name="Logs" />
@@ -26,6 +27,7 @@
               <Directory Id="REVITEXTENSIONSDIR2020" Name="2020" />
               <Directory Id="REVITEXTENSIONSDIR2021" Name="2021" />
               <Directory Id="REVITEXTENSIONSDIR2022" Name="2022" />
+              <Directory Id="REVITEXTENSIONSDIR2023" Name="2023" />
             </Directory>
            </Directory>
 
@@ -63,6 +65,9 @@
               </Directory>
               <Directory Id="R2022DIR" Name="2022">
                 <Directory Id="R2022BHOMDIR" Name="BHoM" />
+              </Directory>
+              <Directory Id="R2023DIR" Name="2023">
+                <Directory Id="R2023BHOMDIR" Name="BHoM" />
               </Directory>
             </Directory>
           </Directory>

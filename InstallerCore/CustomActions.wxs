@@ -29,6 +29,7 @@
     <SetProperty Id="R2020BHoMFolder" Value="[R2020BHOMDIR]" Before="CostInitialize" />
     <SetProperty Id="R2021BHoMFolder" Value="[R2021BHOMDIR]" Before="CostInitialize" />
     <SetProperty Id="R2022BHoMFolder" Value="[R2022BHOMDIR]" Before="CostInitialize" />
+    <SetProperty Id="R2023BHoMFolder" Value="[R2023BHOMDIR]" Before="CostInitialize" />
 
 	</Fragment>
 </Wix>
