@@ -3,8 +3,8 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <MajorVersion Condition=" '$(MajorVersion)' == '' ">5</MajorVersion>
-    <MinorVersion Condition=" '$(MinorVersion)' == '' ">3</MinorVersion>
+    <MajorVersion Condition=" '$(MajorVersion)' == '' ">6</MajorVersion>
+    <MinorVersion Condition=" '$(MinorVersion)' == '' ">0</MinorVersion>
     <VersionSuffix>
     </VersionSuffix>
     <ProductVersion>$(MajorVersion).$(MinorVersion)</ProductVersion>
