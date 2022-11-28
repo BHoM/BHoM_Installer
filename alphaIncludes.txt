@@ -1,4 +1,4 @@
+BHoM/DIALux_Toolkit
 BHoM/EmbodiedSuffering_Toolkit
 BHoM/EnergyPlus_Toolkit
-BHoM/DIALux_Toolkit
 BHoM/TAS_Toolkit
