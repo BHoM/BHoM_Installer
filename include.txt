@@ -1,7 +1,6 @@
 BHoM/BHoM_Datasets
 BHoM/CarbonQueryDatabase_Toolkit
 BHoM/ClimateEmergency_Toolkit
-BHoM/EnergyPlus_Toolkit
 BHoM/ETABS_Toolkit
 BHoM/File_Toolkit
 BHoM/GSA_Toolkit
