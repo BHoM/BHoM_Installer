@@ -10,5 +10,6 @@ BHoM/ETABS_Toolkit/Release17
 BHoM/Lusas_Toolkit/Release17
 BHoM/Lusas_Toolkit/Release18
 BHoM/Lusas_Toolkit/Release19
+BHoM/Lusas_Toolkit/Release191
 BHoM/GSA_Toolkit/Release87
 BHoM/GSA_Toolkit/Release101
