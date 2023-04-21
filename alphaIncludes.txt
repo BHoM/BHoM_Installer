@@ -1,5 +1,6 @@
 BHoM/DIALux_Toolkit
 BHoM/EmbodiedSuffering_Toolkit
 BHoM/EnergyPlus_Toolkit
+BHoM/Karamba3D_Toolkit
 BHoM/SAP_Toolkit
 BHoM/TAS_Toolkit
