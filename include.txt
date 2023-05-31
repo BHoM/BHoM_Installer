@@ -12,7 +12,7 @@ BHoM/Mongo_Toolkit
 BHoM/OpenStreetMap_Toolkit
 BHoM/RAM_Toolkit
 BHoM/Revit_Toolkit
-BHoM/RFEM_Toolkit
+BHoM/RFEM5_Toolkit
 BHoM/Robot_Toolkit
 BHoM/SAP2000_Toolkit
 BHoM/STL_Toolkit
