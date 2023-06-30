@@ -4,3 +4,4 @@ BHoM/EnergyPlus_Toolkit
 BHoM/Karamba3D_Toolkit
 BHoM/SAP_Toolkit
 BHoM/TAS_Toolkit
+BHoM/RFEM6_Toolkit
