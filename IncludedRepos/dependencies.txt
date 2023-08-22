@@ -4,6 +4,6 @@ BHoM/HTTP_Toolkit
 BHoM/Localisation_Toolkit
 BHoM/Psychrometrics_Toolkit
 BHoM/Python_Toolkit
+BHoM/Revit_Toolkit
 BHoM/Rhinoceros_Toolkit
-BHoM/Socket_Toolkit
 BHoM/TriangleNet_Toolkit
