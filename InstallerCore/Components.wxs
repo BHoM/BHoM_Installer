@@ -75,7 +75,6 @@
 		<util:RemoveFolderEx On="both" Property="DYNR20BHOMDIREXTRA" />
 		<util:RemoveFolderEx On="both" Property="DYNR23BHOMDIREXTRA" />
 		<util:RemoveFolderEx On="both" Property="DYNAMOCORE20BHOMDIR" />
-		<util:RemoveFolderEx On="both" Property="DYNAMOREVIT20BHOMDIR" />
 		<util:RemoveFolderEx On="both" Property="DYNAMOCORE23BHOMDIR" />
 		<util:RemoveFolderEx On="both" Property="DYNAMOREVIT23BHOMDIR" />
       </Component>
