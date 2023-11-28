@@ -37,10 +37,6 @@ namespace InstallerCA
     {
         #region Methods
 
-        [CustomAction]      
-
-        #endregion
-
         #region CaRegisterAddIn
         [CustomAction]
         public static ActionResult CaRegisterAddIn(Session session)
