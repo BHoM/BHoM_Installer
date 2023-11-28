@@ -68,59 +68,6 @@
             </Directory>
           </Directory>
         </Directory>
-
-        <Directory Id="DYNAMODIR" Name="Dynamo" >
-          <Directory Id="DYNAMOCOREDIR" Name="Dynamo Core" >
-            <Directory Id="DYNAMOCORE13DIR" Name="1.3" >
-              <Directory Id="DYNAMOCORE13PKGDIR" Name="packages" >
-                <Directory Id="DYNAMOCORE13BHOMDIR" Name="BHoM" >
-                  <Directory Id="DYNC13BHOMDIR" Name="bin" />
-                </Directory>
-              </Directory>
-            </Directory>
-            <Directory Id="DYNAMOCORE20DIR" Name="2.0" >
-              <Directory Id="DYNAMOCORE20PKGDIR" Name="packages" >
-                <Directory Id="DYNAMOCORE20BHOMDIR" Name="BHoM" >
-                  <Directory Id="DYNC20BHOMDIR" Name="bin" />
-                  <Directory Id="DYNC20BHOMDIREXTRA" Name="extra" />
-                </Directory>
-              </Directory>
-            </Directory>
-            <Directory Id="DYNAMOCORE23DIR" Name="2.3" >
-              <Directory Id="DYNAMOCORE23PKGDIR" Name="packages" >
-                <Directory Id="DYNAMOCORE23BHOMDIR" Name="BHoM" >
-                  <Directory Id="DYNC23BHOMDIR" Name="bin" />
-                  <Directory Id="DYNC23BHOMDIREXTRA" Name="extra" />
-                </Directory>
-              </Directory>
-            </Directory>
-          </Directory>
-          <Directory Id="DYNAMOREVITDIR" Name="Dynamo Revit" >
-            <Directory Id="DYNAMOREVIT13DIR" Name="1.3" >
-              <Directory Id="DYNAMOREVIT13PKGDIR" Name="packages" >
-                <Directory Id="DYNAMOREVIT13BHOMDIR" Name="BHoM" >
-                  <Directory Id="DYNR13BHOMDIR" Name="bin" />
-                </Directory>
-              </Directory>
-            </Directory>
-            <Directory Id="DYNAMOREVIT20DIR" Name="2.0" >
-              <Directory Id="DYNAMOREVIT20PKGDIR" Name="packages" >
-                <Directory Id="DYNAMOREVIT20BHOMDIR" Name="BHoM" >
-                  <Directory Id="DYNR20BHOMDIR" Name="bin" />
-                  <Directory Id="DYNR20BHOMDIREXTRA" Name="extra" />
-                </Directory>
-              </Directory>
-            </Directory>
-            <Directory Id="DYNAMOREVIT23DIR" Name="2.3" >
-              <Directory Id="DYNAMOREVIT23PKGDIR" Name="packages" >
-                <Directory Id="DYNAMOREVIT23BHOMDIR" Name="BHoM" >
-                  <Directory Id="DYNR23BHOMDIR" Name="bin" />
-                  <Directory Id="DYNR23BHOMDIREXTRA" Name="extra" />
-                </Directory>
-              </Directory>
-            </Directory>
-          </Directory>
-        </Directory>
       </Directory>
     </Directory>
 	</Fragment>
