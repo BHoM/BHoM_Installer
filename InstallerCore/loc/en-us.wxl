@@ -3,7 +3,7 @@
   <String Id="WixUIAccept">&amp;Accept</String>
   <String Id="BHoMWelcomeDlgDescription" Overridable="yes">DISCLAIMER: The BHoM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-Before running this installer Rhino, Grasshopper, Revit, Dynamo and Microsoft Excel should be closed during this installation.
+Before running this installer Rhino, Grasshopper, Revit and Microsoft Excel should be closed during this installation.
 
 NOTE: Running this installer will replace all older versions of the BHoM .dlls with the newer versions.
 

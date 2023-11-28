@@ -39,11 +39,6 @@
         <ComponentGroupRef Id="Revit2023" />
       </Feature>
 
-      <Feature Id="DynamoPlugin" Title="Dynamo Plugin" Level="1">
-        <ComponentGroupRef Id="Dynamo" />
-        <ComponentGroupRef Id="DYNAMO20" />
-      </Feature>
-
       <Feature Id="Settings" Title="Settings" Level="1">
         <ComponentGroupRef Id="SettingsConfig" />
         <ComponentGroupRef Id="RevitSettingsConfig" />
@@ -68,10 +63,6 @@
       <ComponentGroupRef Id="ResourcesConfig" />
       <ComponentGroupRef Id="RevitResourcesConfig" />
     </Feature>
-
-    <InstallExecuteSequence>
-      <Custom Action="Action_EditDynamo23SettingsXML" Before="InstallFinalize" />
-    </InstallExecuteSequence>
     
 	</Fragment>
 </Wix>

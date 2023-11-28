@@ -21,36 +21,6 @@
       <xsl:attribute name="KeyPath">
         <xsl:text>no</xsl:text>
       </xsl:attribute>
-      <xsl:element name="wix:CopyFile">
-        <xsl:attribute name="Id">
-          <xsl:text>CpyDYNC20__</xsl:text>
-          <xsl:value-of select="generate-id()"/>
-        </xsl:attribute>
-        <xsl:attribute name="DestinationDirectory">
-          <xsl:text>DYNC20BHOMDIR</xsl:text>
-        </xsl:attribute>
-      </xsl:element>
-      <xsl:element name="wix:CopyFile">
-        <xsl:attribute name="Id">
-          <xsl:text>CpyDYNR20__</xsl:text>
-          <xsl:value-of select="generate-id()"/>
-        </xsl:attribute>
-        <xsl:attribute name="DestinationDirectory">
-          <xsl:text>DYNR20BHOMDIR</xsl:text>
-        </xsl:attribute>
-      </xsl:element>
-      <xsl:element name="wix:CopyFile">
-        <xsl:attribute name="Id">
-          <xsl:text>CpyDYNR23__</xsl:text>
-          <xsl:value-of select="generate-id()"/>
-        </xsl:attribute>
-      </xsl:element>
-      <xsl:element name="wix:CopyFile">
-        <xsl:attribute name="Id">
-          <xsl:text>CpyDYNC23__</xsl:text>
-          <xsl:value-of select="generate-id()"/>
-        </xsl:attribute>
-      </xsl:element>
     </xsl:copy>
   </xsl:template>
 </xsl:stylesheet>

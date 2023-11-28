@@ -1,3 +1,2 @@
 BHoM/Grasshopper_UI
-BHoM/Dynamo_UI
 BHoM/Excel_UI

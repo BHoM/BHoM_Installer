@@ -58,11 +58,6 @@
 
     <ComponentGroup Id="Dynamo">
       <Component Id="DynPkg20" Directory="DYNAMOREVIT20BHOMDIR">
-        <File Source="..\..\Dynamo_UI\Dynamo20\pkg.json" Id="Dynamo20pkg">
-          <CopyFile Id="CpyDynamo20Pkg" DestinationDirectory="DYNAMOCORE20BHOMDIR" />
-          <CopyFile Id="CpyDynamo23Pkg" DestinationDirectory="DYNAMOCORE23BHOMDIR" />
-          <CopyFile Id="CpyDynamoR23Pkg" DestinationDirectory="DYNAMOREVIT23BHOMDIR" />
-        </File>
         <util:RemoveFolderEx On="both" Property="DYNAMOCORE20BHOMDIR" />
         <util:RemoveFolderEx On="both" Property="DYNAMOREVIT20BHOMDIR" />
         <util:RemoveFolderEx On="both" Property="DYNAMOCORE23BHOMDIR" />
@@ -70,12 +65,6 @@
       </Component>
 
       <Component Id="DynView20" Directory="DYNAMOREVIT20BHOMDIR">
-        <File Source="..\..\Dynamo_UI\Dynamo20\BHoM_ViewExtensionDefinition.xml" Id="Dynamo20ViewPkg">
-          <CopyFile Id="CpyDynamo20View" DestinationDirectory="DYNC20BHOMDIREXTRA"/>
-          <CopyFile Id="CpyDynamo23View" DestinationDirectory="DYNC23BHOMDIREXTRA"/>
-          <CopyFile Id="CpyDynamoR20View" DestinationDirectory="DYNR20BHOMDIREXTRA"/>
-          <CopyFile Id="CpyDynamoR23View" DestinationDirectory="DYNR23BHOMDIREXTRA"/>
-        </File>
         <util:RemoveFolderEx On="both" Property="DYNC20BHOMDIREXTRA" />
         <util:RemoveFolderEx On="both" Property="DYNC23BHOMDIREXTRA" />
         <util:RemoveFolderEx On="both" Property="DYNR20BHOMDIREXTRA" />
@@ -96,6 +85,7 @@
         <util:RemoveFolderEx On="both" Property="DYNC13BHOMDIR"/>
         <util:RemoveFolderEx On="both" Property="DYNAMOREVIT13BHOMDIR"/>
         <util:RemoveFolderEx On="both" Property="DYNR13BHOMDIR"/>
+		<util:RemoveFolderEx On="both" Property="DYNAMOREVIT20BHOMDIR"/> 
       </Component>
     </ComponentGroup>
 
