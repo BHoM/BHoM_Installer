@@ -60,7 +60,7 @@
       <Component Id="RevitAddin2024">
         <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2024.Addin" />
         <util:RemoveFolderEx On="install" Property="R2024BHoMFolder" />
-        <RemoveFile On="install" Id="RemoveLegacyAddin23" Name="BHoM.Addin"/>
+        <RemoveFile On="install" Id="RemoveLegacyAddin24" Name="BHoM.Addin"/>
       </Component>
     </ComponentGroup>
 
