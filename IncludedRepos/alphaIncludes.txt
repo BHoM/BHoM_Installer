@@ -1,5 +1,4 @@
 BHoM/EmbodiedSuffering_Toolkit
 BHoM/Karamba3D_Toolkit
 BHoM/PowerPoint_Toolkit
-BHoM/RFEM6_Toolkit
 BHoM/SAP_Toolkit
