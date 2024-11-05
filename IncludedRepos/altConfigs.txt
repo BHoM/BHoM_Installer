@@ -6,6 +6,7 @@ BHoM/Revit_Toolkit/Release2024
 BHoM/ETABS_Toolkit/Release
 BHoM/ETABS_Toolkit/Release16
 BHoM/ETABS_Toolkit/Release17
+BHoM/ETABS_Toolkit/Release21
 BHoM/Lusas_Toolkit/Release17
 BHoM/Lusas_Toolkit/Release18
 BHoM/Lusas_Toolkit/Release19
