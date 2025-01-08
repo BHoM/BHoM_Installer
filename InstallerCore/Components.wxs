@@ -64,6 +64,14 @@
       </Component>
     </ComponentGroup>
 
+    <ComponentGroup Id="Revit2025" Directory="R2025DIR">
+      <Component Id="RevitAddin2025">
+        <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2025.Addin" />
+        <util:RemoveFolderEx On="install" Property="R2025BHoMFolder" />
+        <RemoveFile On="install" Id="RemoveLegacyAddin25" Name="BHoM.Addin"/>
+      </Component>
+    </ComponentGroup>
+
     <ComponentGroup Id="Core" Directory="INSTALLFOLDER">
       <Component Id="CleanExisting">
         <RegistryKey Root="HKCU" Key="Software\BHoM">
@@ -125,6 +133,12 @@
       </Component>
     </ComponentGroup>
 
+    <ComponentGroup Id="RevitSettingsConfig2025" Directory="REVITSETTINGSDIR2025">
+      <Component Id="RevitSettingsConfig2025" Guid="81e438a0-8674-4341-93f2-a8a820206817">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+
     <ComponentGroup Id="ExtensionsConfig" Directory="EXTENSIONSDIR">
       <Component Id="ExtensionsConfig" Guid="b8cd0c91-2ebc-4bd6-ad2b-1e28fc9e6ad3">
         <CreateFolder />
@@ -163,6 +177,12 @@
 
     <ComponentGroup Id="RevitExtensionsConfig2024" Directory="REVITEXTENSIONSDIR2024">
       <Component Id="RevitExtensionsConfig2024" Guid="d33fcffd-3abf-486e-8030-e4945bc9f007">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="RevitExtensionsConfig2025" Directory="REVITEXTENSIONSDIR2025">
+      <Component Id="RevitExtensionsConfig2025" Guid="7a65f759-009b-4f87-8a9b-2cb36ed207ef">
         <CreateFolder />
       </Component>
     </ComponentGroup>
