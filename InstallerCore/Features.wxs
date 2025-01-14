@@ -38,6 +38,7 @@
         <ComponentGroupRef Id="Revit2022" />
         <ComponentGroupRef Id="Revit2023" />
         <ComponentGroupRef Id="Revit2024" />
+        <ComponentGroupRef Id="Revit2025" />
       </Feature>
 
       <Feature Id="Settings" Title="Settings" Level="1">
@@ -48,6 +49,7 @@
         <ComponentGroupRef Id="RevitSettingsConfig2022" />
         <ComponentGroupRef Id="RevitSettingsConfig2023" />
         <ComponentGroupRef Id="RevitSettingsConfig2024" />
+        <ComponentGroupRef Id="RevitSettingsConfig2025" />
       </Feature>
 
       <Feature Id="Extensions" Title="Extensions" Level="1">
@@ -58,6 +60,7 @@
         <ComponentGroupRef Id="RevitExtensionsConfig2022" />
         <ComponentGroupRef Id="RevitExtensionsConfig2023" />
         <ComponentGroupRef Id="RevitExtensionsConfig2024" />
+        <ComponentGroupRef Id="RevitExtensionsConfig2025" />
       </Feature>
     </FeatureGroup>
 
