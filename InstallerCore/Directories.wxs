@@ -49,7 +49,6 @@
         <Directory Id="AUTODESKDIR" Name="Autodesk" >
           <Directory Id="REVITDIR" Name="Revit">
             <Directory Id="REVITADDINSDIR" Name="Addins">
-              </Directory>
               <Directory Id="R2021DIR" Name="2021">
                 <Directory Id="R2021BHOMDIR" Name="BHoM" />
               </Directory>
