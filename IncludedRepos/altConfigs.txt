@@ -15,3 +15,4 @@ BHoM/Lusas_Toolkit/Release210
 BHoM/Lusas_Toolkit/Release211
 BHoM/GSA_Toolkit/Release87
 BHoM/GSA_Toolkit/Release101
+BHoM/GSA_Toolkit/Release102
