@@ -10,22 +10,22 @@
           <Directory Id="SETTINGSDIR" Name="Settings">
             <Directory Id="PYTHONSETTINGSDIR" Name="Python" />
             <Directory Id="REVITSETTINGSDIR" Name="Revit">
-              <Directory Id="REVITSETTINGSDIR2020" Name="2020" />
               <Directory Id="REVITSETTINGSDIR2021" Name="2021" />
               <Directory Id="REVITSETTINGSDIR2022" Name="2022" />
               <Directory Id="REVITSETTINGSDIR2023" Name="2023" />
               <Directory Id="REVITSETTINGSDIR2024" Name="2024" />
+              <Directory Id="REVITSETTINGSDIR2025" Name="2025" />
             </Directory>
           </Directory>
           <Directory Id="LOGSDIR" Name="Logs" />
           <Directory Id="EXTENSIONSDIR" Name="Extensions">
             <Directory Id="PYTHONCODEDIR" Name="PythonCode" />
             <Directory Id="REVITEXTENSIONSDIR" Name="Revit">
-              <Directory Id="REVITEXTENSIONSDIR2020" Name="2020" />
               <Directory Id="REVITEXTENSIONSDIR2021" Name="2021" />
               <Directory Id="REVITEXTENSIONSDIR2022" Name="2022" />
               <Directory Id="REVITEXTENSIONSDIR2023" Name="2023" />
               <Directory Id="REVITEXTENSIONSDIR2024" Name="2024" />
+              <Directory Id="REVITEXTENSIONSDIR2025" Name="2025" />
             </Directory>
            </Directory>
 
@@ -49,15 +49,6 @@
         <Directory Id="AUTODESKDIR" Name="Autodesk" >
           <Directory Id="REVITDIR" Name="Revit">
             <Directory Id="REVITADDINSDIR" Name="Addins">
-              <Directory Id="R2018DIR" Name="2018">
-                <Directory Id="R2018BHOMDIR" Name="BHoM" />
-              </Directory>
-              <Directory Id="R2019DIR" Name="2019">
-                <Directory Id="R2019BHOMDIR" Name="BHoM" />
-              </Directory>
-              <Directory Id="R2020DIR" Name="2020">
-                <Directory Id="R2020BHOMDIR" Name="BHoM" />
-              </Directory>
               <Directory Id="R2021DIR" Name="2021">
                 <Directory Id="R2021BHOMDIR" Name="BHoM" />
               </Directory>
@@ -69,6 +60,9 @@
               </Directory>
               <Directory Id="R2024DIR" Name="2024">
                 <Directory Id="R2024BHOMDIR" Name="BHoM" />
+              </Directory>
+              <Directory Id="R2025DIR" Name="2025">
+                <Directory Id="R2025BHOMDIR" Name="BHoM" />
               </Directory>
             </Directory>
           </Directory>

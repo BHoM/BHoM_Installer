@@ -1,8 +1,8 @@
-BHoM/Revit_Toolkit/Release2020
 BHoM/Revit_Toolkit/Release2021
 BHoM/Revit_Toolkit/Release2022
 BHoM/Revit_Toolkit/Release2023
 BHoM/Revit_Toolkit/Release2024
+BHoM/Revit_Toolkit/Release2025
 BHoM/ETABS_Toolkit/Release
 BHoM/ETABS_Toolkit/Release16
 BHoM/ETABS_Toolkit/Release17
@@ -15,3 +15,4 @@ BHoM/Lusas_Toolkit/Release210
 BHoM/Lusas_Toolkit/Release211
 BHoM/GSA_Toolkit/Release87
 BHoM/GSA_Toolkit/Release101
+BHoM/GSA_Toolkit/Release102
