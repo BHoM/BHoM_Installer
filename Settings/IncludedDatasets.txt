@@ -56,7 +56,6 @@ Materials\MaterialsUSA\Concrete
 Materials\MaterialsUSA\Steel
 MEP\PlumbingFixtureFlow_LEED
 MEP\PlumbingFixtureUsage_LEED
-Planning\Labels\IssueLabels
 Revit\ParameterMaps\BHoM Default ParameterMaps
 SectionProperties\EU_SteelSections\CHS
 SectionProperties\EU_SteelSections\HE+
