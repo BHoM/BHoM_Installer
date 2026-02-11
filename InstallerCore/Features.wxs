@@ -30,6 +30,7 @@
 
       <Feature Id="GrasshopperPlugin" Title="Grasshopper Plugin" Level="1">
         <ComponentGroupRef Id="Grasshopper" />
+        <ComponentGroupRef Id="GRASSHOPPERPLUGIN" />
       </Feature>
 
       <Feature Id="RevitPlugin" Title="Revit Plugin" Level="1">
