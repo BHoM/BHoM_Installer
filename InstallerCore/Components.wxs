@@ -17,7 +17,7 @@
       </Component>
     </ComponentGroup>
 
-    <ComponentGroup Id="Grasshopper" Directory="ASSEMBLIESDIR">
+    <ComponentGroup Id="Grasshopper" Directory="GRASSHOPPERPLUGINDIR">
       <Component Id="GHA" Guid="{A1EE1994-996D-4AF2-B61E-DA5C910534CC}">
         <File KeyPath="yes" Source="..\..\Grasshopper_UI\Build\BH.UI.Grasshopper.dll" Name="BH.UI.Grasshopper.gha" />
         <util:RemoveFolderEx On="install" Property="GHBHoMFolder" />
@@ -70,6 +70,7 @@
           <RegistryValue Name="Installer" Type="integer" Value="1"></RegistryValue>
         </RegistryKey>
         <util:RemoveFolderEx On="both" Property="ASSEMBLIESDIR" />
+        <util:RemoveFolderEx On="both" Property="GRASSHOPPERPLUGINDIR" />
         <util:RemoveFolderEx On="both" Property="FILESDIR" />
         <util:RemoveFolderEx On="both" Property="UPGRADESDIR" />
         <util:RemoveFolderEx On="both" Property="OLDINSTALLFOLDER" />
