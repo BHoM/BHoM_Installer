@@ -12,3 +12,6 @@ BHoM/Lusas_Toolkit/Release230
 BHoM/GSA_Toolkit/Release87
 BHoM/GSA_Toolkit/Release101
 BHoM/GSA_Toolkit/Release102
+BHoM/RFEM6_Toolkit/Release
+BHoM/RFEM6_Toolkit/Release_V682
+BHoM/RFEM6_Toolkit/Release_V12
