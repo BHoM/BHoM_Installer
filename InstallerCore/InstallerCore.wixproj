@@ -13,7 +13,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgrades;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;ResourcesDir=..\..\BHoM_Installer\InstallerCore\Resources;PythonCodeDir=..\..\BHoM_Installer\InstallerCore\Extensions\PythonCode;GrasshopperPluginDir=..\..\BHoM_Installer\InstallerCore\GrasshopperPlugin</DefineConstants>
+    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgrades;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;ResourcesDir=..\..\BHoM_Installer\InstallerCore\Resources;PythonCodeDir=..\..\BHoM_Installer\InstallerCore\Extensions\PythonCode;GrasshopperPluginDir=..\..\BHoM_Installer\InstallerCore\GrasshopperPlugin;SettingsDir=..\..\BHoM_Installer\InstallerCore\Settings</DefineConstants>
     <VerboseOutput>False</VerboseOutput>
     <LibBindFiles>False</LibBindFiles>
     <SuppressAllWarnings>False</SuppressAllWarnings>
@@ -25,7 +25,7 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <WixVariables>
     </WixVariables>
-    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgrades;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;GrasshopperPluginDir=..\..\BHoM_Installer\InstallerCore\GrasshopperPlugin</DefineConstants>
+    <DefineConstants>UpgradesDir=..\..\BHoM_Installer\InstallerCore\Upgrades;DataDir=..\..\BHoM_Installer\InstallerCore\DataSets;FilesDir=..\..\BHoM_Installer\InstallerCore\Assemblies;GrasshopperPluginDir=..\..\BHoM_Installer\InstallerCore\GrasshopperPlugin;SettingsDir=..\..\BHoM_Installer\InstallerCore\Settings</DefineConstants>
     <SuppressAllWarnings>False</SuppressAllWarnings>
     <Pedantic>False</Pedantic>
     <RunWixToolsOutOfProc Condition=" '$(PROCESSOR_ARCHITECTURE)'!='x86' ">true</RunWixToolsOutOfProc>
@@ -75,6 +75,9 @@
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Assemblies\* Assemblies" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Upgrades\* Upgrades" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="del Assemblies\*.dna Assemblies\*.xll" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="if not exist Settings mkdir Settings" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /C $(ALLUSERSPROFILE)\BHoM\Settings\*.json Settings" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /C $(ALLUSERSPROFILE)\BHoM\Settings\*.cfg Settings" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Datasets DataSets" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E $(ALLUSERSPROFILE)\BHoM\Extensions\PythonCode\* Extensions\PythonCode" />
     <Exec WorkingDirectory="$(ProjectDir)" Command="xcopy /Y /I /E /C $(ALLUSERSPROFILE)\BHoM\Resources\* Resources" />
@@ -86,6 +89,7 @@
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_upgrades.wxs" DirectoryRefId="UPGRADESDIR" Directory="$(ProjectDir)Upgrades" ComponentGroupName="UPGRADES" PreprocessorVariable="var.UpgradesDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_pythoncode.wxs" DirectoryRefId="PYTHONCODEDIR" Directory="$(ProjectDir)Extensions\PythonCode" ComponentGroupName="PYTHONCODE" PreprocessorVariable="var.PythonCodeDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
     <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_grasshopperplugin.wxs" DirectoryRefId="GRASSHOPPERPLUGINDIR" Directory="$(ProjectDir)GrasshopperPlugin" ComponentGroupName="GRASSHOPPERPLUGIN" PreprocessorVariable="var.GrasshopperPluginDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
+    <HeatDirectory ToolPath="$(WixToolPath)" OutputFile="$(IntermediateOutputPath)_settings.wxs" DirectoryRefId="SETTINGSDIR" Directory="$(ProjectDir)Settings" ComponentGroupName="SETTINGS" PreprocessorVariable="var.SettingsDir" AutogenerateGuids="false" SuppressRegistry="true" SuppressRootDirectory="true" GenerateGuidsNow="true" RunAsSeparateProcess="$(RunWixToolsOutOfProc)" />
     <ItemGroup>
       <Compile Include="$(IntermediateOutputPath)_assemblies.wxs" />
       <Compile Include="$(IntermediateOutputPath)_datasets.wxs" />
@@ -93,6 +97,7 @@
       <Compile Include="$(IntermediateOutputPath)_pythoncode.wxs" />
       <Compile Include="$(IntermediateOutputPath)_resources.wxs" />
       <Compile Include="$(IntermediateOutputPath)_grasshopperplugin.wxs" />
+      <Compile Include="$(IntermediateOutputPath)_settings.wxs" />
     </ItemGroup>
   </Target>
 </Project>
