@@ -42,6 +42,7 @@
       </Feature>
 
       <Feature Id="Settings" Title="Settings" Level="1">
+        <ComponentGroupRef Id="SETTINGS" />
         <ComponentGroupRef Id="SettingsConfig" />
         <ComponentGroupRef Id="RevitSettingsConfig" />
         <ComponentGroupRef Id="RevitSettingsConfig2022" />
