@@ -52,19 +52,10 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Mint cross-org dependency token
-        id: dep-token
-        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/mint-dep-token@main
-        with:
-          app_id:         ${{ secrets.BHOM_APP_ID }}
-          private_key:    ${{ secrets.BHOM_APP_PRIVATE_KEY }}
-          fallback_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Configure git to use the minted token
-        run: |
-          # Inject the token at git-config level so subsequent clones authenticate.
-          # Avoids embedding the token in URLs (would land in process listings + repo clones).
-          git config --global url."https://x-access-token:${{ steps.dep-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
+      # No git-auth configuration needed: all repos referenced by the BHoM_Installer
+      # manifests are public BHoM org repos. When this workflow is extended to
+      # BuroHappold_Installer (which bundles private BHE repos), add the
+      # mint-dep-token step here.
 
       - name: Build installer
         id: build
@@ -87,8 +78,3 @@ jobs:
           path: ${{ github.workspace }}/Build/*.msi
           if-no-files-found: error
           retention-days: 30
-
-      - name: Cleanup token config
-        if: always()
-        run: |
-          git config --global --unset url."https://x-access-token:${{ steps.dep-token.outputs.token }}@github.com/".insteadOf 2>$null
