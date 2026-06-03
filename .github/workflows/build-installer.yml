@@ -1,0 +1,94 @@
+# Build Installer — GitHub Actions replacement for BHoMBot's 00:45 UTC alpha build.
+#
+# Initial iteration: workflow_dispatch only, so we can trigger manually and iterate.
+# Once a green build is produced, uncomment the schedule trigger to enable nightly
+# alpha cadence matching BHoMBot.
+#
+# Triggers (Phase 1):
+#   workflow_dispatch  — manual run for iteration + ad-hoc beta-test builds
+#   schedule (commented out for now) — nightly 00:45 UTC for alpha cadence
+#
+# Triggers to be added later:
+#   push: tags v*     — Phase 1.5, tagged release builds
+#   schedule          — uncomment once dispatch is reliable
+
+name: Build Installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        type: choice
+        options:
+          - alpha
+          - beta
+        default: alpha
+      patch_version:
+        description: 'Patch version (yyMMdd). Blank = today.'
+        type: string
+        required: false
+        default: ''
+
+  # Uncomment once workflow_dispatch produces a clean .msi reliably:
+  # schedule:
+  #   - cron: '45 0 * * *'   # 00:45 UTC nightly, matching BHoMBot
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ inputs.release_type || 'alpha' }} installer
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 180   # generous; tighten once we know real duration
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Checkout installer repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Mint cross-org dependency token
+        id: dep-token
+        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/mint-dep-token@main
+        with:
+          app_id:         ${{ secrets.BHOM_APP_ID }}
+          private_key:    ${{ secrets.BHOM_APP_PRIVATE_KEY }}
+          fallback_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git to use the minted token
+        run: |
+          # Inject the token at git-config level so subsequent clones authenticate.
+          # Avoids embedding the token in URLs (would land in process listings + repo clones).
+          git config --global url."https://x-access-token:${{ steps.dep-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Build installer
+        id: build
+        run: |
+          $releaseType = '${{ inputs.release_type }}'
+          if (-not $releaseType) { $releaseType = 'alpha' }
+
+          $patchVersion = '${{ inputs.patch_version }}'
+
+          $args = @('-ReleaseType', $releaseType)
+          if ($patchVersion) { $args += @('-PatchVersion', $patchVersion) }
+
+          & "$env:GITHUB_WORKSPACE\scripts\Build-Installer.ps1" @args
+
+      - name: Upload installer artefact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ inputs.release_type || 'alpha' }}-${{ github.run_id }}
+          path: ${{ github.workspace }}/Build/*.msi
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Cleanup token config
+        if: always()
+        run: |
+          git config --global --unset url."https://x-access-token:${{ steps.dep-token.outputs.token }}@github.com/".insteadOf 2>$null
