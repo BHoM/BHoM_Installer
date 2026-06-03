@@ -308,12 +308,19 @@ $sizeMB = [math]::Round($msi.Length / 1MB, 2)
 Write-Host "::notice::Installer built: $($msi.FullName) ($sizeMB MB)"
 
 # Also copy to GITHUB_WORKSPACE\Build\ so actions/upload-artifact finds it via
-# the workflow's static path (workspace-relative).
+# the workflow's static path (workspace-relative). Skip when MSBuild already
+# emitted the .msi into that exact directory (would otherwise raise
+# "Cannot overwrite the item with itself").
 if ($env:GITHUB_WORKSPACE) {
     $workspaceBuild = Join-Path $env:GITHUB_WORKSPACE 'Build'
     New-Item -ItemType Directory -Force -Path $workspaceBuild | Out-Null
-    Copy-Item $msi.FullName $workspaceBuild -Force
-    Write-Host "::notice::Copied to $workspaceBuild for artefact upload"
+    $workspaceBuildResolved = (Resolve-Path $workspaceBuild).Path
+    if ($msi.DirectoryName -ne $workspaceBuildResolved) {
+        Copy-Item $msi.FullName $workspaceBuild -Force
+        Write-Host "::notice::Copied to $workspaceBuild for artefact upload"
+    } else {
+        Write-Host "::notice::.msi already in $workspaceBuild, no copy needed"
+    }
 }
 
 # Expose outputs to the workflow
