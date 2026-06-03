@@ -65,10 +65,12 @@ jobs:
 
           $patchVersion = '${{ inputs.patch_version }}'
 
-          $args = @('-ReleaseType', $releaseType)
-          if ($patchVersion) { $args += @('-PatchVersion', $patchVersion) }
+          # Hashtable splat (not array) so PowerShell binds by parameter name.
+          # Array splatting was treating '-ReleaseType' as a positional value.
+          $splat = @{ ReleaseType = $releaseType }
+          if ($patchVersion) { $splat['PatchVersion'] = $patchVersion }
 
-          & "$env:GITHUB_WORKSPACE\scripts\Build-Installer.ps1" @args
+          & "$env:GITHUB_WORKSPACE\scripts\Build-Installer.ps1" @splat
 
       - name: Upload installer artefact
         if: success()
