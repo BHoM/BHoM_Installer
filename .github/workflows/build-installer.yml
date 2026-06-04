@@ -96,33 +96,6 @@ jobs:
           Write-Host "Wrote $propsPath"
           Write-Host "FrameworkPathOverride (v4.0 only) = $refPath"
 
-      - name: Compute cache key date
-        id: cache-date
-        run: |
-          "today=$(Get-Date -Format yyyy-MM-dd)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-
-      - name: Cache BHoM dep clones + ProgramData
-        # Cache the cloned dep repos alongside the installer checkout and the
-        # ProgramData\BHoM staging area where every dep's PostBuildEvent xcopies
-        # its DLLs. With a same-day cache hit:
-        #   - Clone-Repo skips re-cloning (already idempotent on existing .git)
-        #   - MSBuild incremental sees no source changes and short-circuits
-        #   - PostBuildEvents don't fire (no inputs newer than outputs)
-        #   - ProgramData is already populated from the cache
-        # Net: 12-min cold build collapses to ~3-4 min on warm reruns.
-        #
-        # The 'today' date in the key forces a fresh full build at most every
-        # 24h, matching BHoMBot's nightly cadence. No restore-keys / fallback,
-        # so we never use a >1-day-old cache (would risk shipping stale deps).
-        id: deps-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            D:/a/BHoM_Installer
-            !D:/a/BHoM_Installer/BHoM_Installer
-            C:/ProgramData/BHoM
-          key: bhom-deps-${{ inputs.release_type }}-${{ hashFiles('IncludedRepos/*.txt') }}-${{ steps.cache-date.outputs.today }}
-
       - name: Pin WiX Toolset v3.11.2
         # GHA windows-2025-vs2026 ships WiX v3.14. The v3.14 SfxCA.dll stub
         # (bundled by MakeSfxCA into InstallerCA.CA.dll) appears to be the
