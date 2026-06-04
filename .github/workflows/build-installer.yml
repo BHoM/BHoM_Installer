@@ -141,6 +141,40 @@ jobs:
 
           & "$env:GITHUB_WORKSPACE\scripts\Build-Installer.ps1" @splat
 
+      - name: Generate dep manifest (for release-note diffing)
+        # Walk the cloned dep repos that sit alongside the installer checkout
+        # and record each one's (org/repo, branch, current tip SHA). The
+        # publish-alpha job downloads the previous release's copy of this file
+        # and diffs it against this one to render "what changed since last build"
+        # release notes.
+        run: |
+          $depsObject = [ordered]@{}
+          Get-ChildItem 'D:\a\BHoM_Installer' -Directory -ErrorAction SilentlyContinue |
+              Where-Object { $_.Name -ne 'BHoM_Installer' -and (Test-Path (Join-Path $_.FullName '.git')) } |
+              Sort-Object Name |
+              ForEach-Object {
+                  $remoteUrl = (git -C $_.FullName config --get remote.origin.url 2>$null)
+                  if ($remoteUrl -match 'github\.com[/:]([^/]+)/([^/.]+?)(?:\.git)?$') {
+                      $orgRepo = "$($Matches[1])/$($Matches[2])"
+                      $sha = (git -C $_.FullName rev-parse HEAD 2>$null).Trim()
+                      if ($sha) {
+                          $depsObject[$orgRepo] = [ordered]@{ branch = 'develop'; sha = $sha }
+                      }
+                  }
+              }
+
+          $manifest = [ordered]@{
+              version       = 1
+              built_at      = (Get-Date).ToUniversalTime().ToString('o')
+              release_type  = '${{ inputs.release_type || ''alpha'' }}'
+              main_branch   = 'develop'
+              deps          = $depsObject
+          }
+
+          $outPath = "${{ github.workspace }}/Build/dep-manifest.json"
+          $manifest | ConvertTo-Json -Depth 10 | Set-Content -Path $outPath -Encoding UTF8
+          Write-Host "::notice::Wrote dep-manifest.json with $($depsObject.Count) deps"
+
       - name: Assert .msi size is sane
         # Catches catastrophic packaging regressions: a tiny .msi means WiX shipped
         # nearly nothing; a huge one means something is being bundled that shouldn't
@@ -160,7 +194,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: installer-${{ inputs.release_type || 'alpha' }}-${{ github.run_id }}
-          path: ${{ github.workspace }}/Build/*.msi
+          path: |
+            ${{ github.workspace }}/Build/*.msi
+            ${{ github.workspace }}/Build/dep-manifest.json
           if-no-files-found: error
           retention-days: 30
 
@@ -320,32 +356,80 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download .msi artefact
+      - name: Checkout installer repo (for the notes script)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            scripts/generate_release_notes.py
+          sparse-checkout-cone-mode: false
+
+      - name: Download current .msi + dep-manifest.json
         uses: actions/download-artifact@v4
         with:
           name: installer-${{ inputs.release_type || 'alpha' }}-${{ github.run_id }}
-          path: msi
+          path: artefact
+
+      - name: Download previous nightly-alpha dep-manifest (if any)
+        id: prev-manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          mkdir -p prev
+          if gh release download nightly-alpha \
+              --repo "$GITHUB_REPOSITORY" \
+              --pattern dep-manifest.json \
+              --dir prev 2>/dev/null; then
+              echo "Previous nightly-alpha manifest downloaded"
+              echo "path=prev/dep-manifest.json" >> "$GITHUB_OUTPUT"
+          else
+              echo "::notice::No previous nightly-alpha release found — this will be an initial publish"
+              echo "path=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate dep-change release-notes section
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/generate_release_notes.py \
+              artefact/dep-manifest.json \
+              "${{ steps.prev-manifest.outputs.path }}" \
+              release-notes-section.md
+
+      - name: Compose full release body
+        run: |
+          cat >release-body.md <<'EOF'
+          **Latest BHoM alpha build.**
+
+          - Build: [#${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - Commit: `${{ github.sha }}`
+          - Triggered by: `${{ github.event_name }}`
+
+          Install: download the `.msi`, double-click. Uninstall via Windows
+          "Apps & Features".
+
+          This tag is re-issued on every successful nightly build and on
+          on-demand `workflow_dispatch` runs — bookmark this page for the
+          latest alpha.
+
+          ---
+
+          EOF
+          cat release-notes-section.md >> release-body.md
+          echo ""
+          echo "=== Release body preview (first 80 lines) ==="
+          head -80 release-body.md
 
       - name: Publish / update rolling release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: nightly-alpha
           name: BHoM Alpha (Nightly)
-          body: |
-            **Latest BHoM alpha build.**
-
-            - Build: [#${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            - Commit: `${{ github.sha }}`
-            - Triggered by: `${{ github.event_name }}`
-            - Built: `${{ github.event.repository.updated_at }}`
-
-            Install: download the `.msi`, double-click. Uninstall via Windows
-            "Apps & Features".
-
-            This tag is re-issued on every successful nightly build and on
-            on-demand `workflow_dispatch` runs — bookmark this page for the
-            latest alpha.
-          files: msi/*.msi
+          body_path: release-body.md
+          files: |
+            artefact/*.msi
+            artefact/dep-manifest.json
           make_latest: false
           prerelease: true
 
