@@ -498,6 +498,22 @@ jobs:
           title="[CI] Nightly alpha build failed ($today)"
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
+          # ALWAYS emit a workflow-page-visible annotation. This is the lower
+          # bound: a failure indicator that's visible regardless of whether
+          # the consumer repo has Issues enabled. The tracking-issue creation
+          # below is an extra signal on top of this.
+          echo "::error title=Nightly alpha build failed::See $run_url"
+
+          # Skip tracking-issue creation if the repo has Issues disabled
+          # (this surfaced on the sandbox repo when notify-on-failure was
+          # first smoke-tested — gh issue create errors with 'repository has
+          # disabled issues'). The annotation above remains the signal.
+          has_issues=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.has_issues // false')
+          if [ "$has_issues" != "true" ]; then
+              echo "::notice::Issues disabled on $GITHUB_REPOSITORY — skipping tracking-issue creation. Workflow annotation above remains the failure marker."
+              exit 0
+          fi
+
           body=$(cat <<EOF
           The scheduled nightly alpha build failed.
 
