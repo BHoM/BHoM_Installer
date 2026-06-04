@@ -338,20 +338,23 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  # Publish the validated .msi to a rolling 'nightly-alpha' Release tag.
-  # Same tag is updated on every successful nightly + dispatch build, so users
-  # have one stable URL for the latest alpha:
-  #   https://github.com/<repo>/releases/tag/nightly-alpha
+  # Publish the .msi as a preserved per-build Release. Tag scheme:
+  #   schedule         → alpha-{YYYYMMDD}                    (one per day)
+  #   workflow_dispatch → manual-alpha-{YYYYMMDD-HHMMSS}    (one per dispatch)
+  # No rolling tag: each release stays as history. No "skip if unchanged"
+  # gate: the build itself runs every cycle as a CI heartbeat.
   #
-  # Gated behind install-test passing on all matrix legs. Only publishes alphas
-  # (beta and other release types are skipped here — they'd get their own tag
-  # in a future iteration). prerelease: true keeps the 'Latest release' badge
-  # reserved for semver-tagged stable builds.
+  # Publishes even if install-test failed — the .msi is still useful for
+  # local diagnostic testing. The body surfaces the test result so users
+  # know whether to trust the build for production use.
   publish-alpha:
-    name: Publish nightly-alpha release
+    name: Publish alpha release
     needs: [build, install-test]
+    # always() overrides the implicit "all needs succeeded" gate so that
+    # install-test failure doesn't block publishing.
     if: |
-      success() &&
+      always() &&
+      needs.build.result == 'success' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
       (inputs.release_type == 'alpha' || inputs.release_type == null || inputs.release_type == '')
     runs-on: ubuntu-latest
@@ -372,22 +375,48 @@ jobs:
           name: installer-${{ inputs.release_type || 'alpha' }}-${{ github.run_id }}
           path: artefact
 
-      - name: Download previous nightly-alpha dep-manifest (if any)
+      - name: Compute release tag + name
+        id: tag
+        shell: bash
+        run: |
+          set -eu
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+              tag="alpha-$(date -u +%Y%m%d)"
+              name="BHoM Alpha — $(date -u +%Y-%m-%d)"
+          else
+              tag="manual-alpha-$(date -u +%Y%m%d-%H%M%S)"
+              name="BHoM Alpha — manual $(date -u +'%Y-%m-%d %H:%M:%S') UTC"
+          fi
+          echo "tag=$tag"   >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "::notice::Release tag = $tag"
+
+      - name: Find + download most recent prior alpha dep-manifest (for diff)
         id: prev-manifest
         env:
           GH_TOKEN: ${{ github.token }}
+          CURRENT_TAG: ${{ steps.tag.outputs.tag }}
         run: |
           set -eu
           mkdir -p prev
-          if gh release download nightly-alpha \
+          # List releases, pick the most recent alpha-*/manual-alpha-* whose tag
+          # isn't the one we're about to publish.
+          prev_tag=$(gh release list \
+              --repo "$GITHUB_REPOSITORY" \
+              --limit 50 \
+              --json tagName,createdAt \
+              --jq "[.[] | select(.tagName | test(\"^(alpha|manual-alpha)-\")) | select(.tagName != \"$CURRENT_TAG\")] | sort_by(.createdAt) | reverse | .[0].tagName // \"\"")
+          if [ -n "$prev_tag" ] && gh release download "$prev_tag" \
               --repo "$GITHUB_REPOSITORY" \
               --pattern dep-manifest.json \
               --dir prev 2>/dev/null; then
-              echo "Previous nightly-alpha manifest downloaded"
+              echo "::notice::Diffing against previous release: $prev_tag"
               echo "path=prev/dep-manifest.json" >> "$GITHUB_OUTPUT"
+              echo "prev_tag=$prev_tag"          >> "$GITHUB_OUTPUT"
           else
-              echo "::notice::No previous nightly-alpha release found — this will be an initial publish"
-              echo "path=" >> "$GITHUB_OUTPUT"
+              echo "::notice::No prior alpha release with a manifest — this will be an initial-baseline publish"
+              echo "path="     >> "$GITHUB_OUTPUT"
+              echo "prev_tag=" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Generate dep-change release-notes section
@@ -400,20 +429,37 @@ jobs:
               release-notes-section.md
 
       - name: Compose full release body
+        env:
+          INSTALL_TEST_RESULT: ${{ needs.install-test.result }}
+          PREV_TAG:            ${{ steps.prev-manifest.outputs.prev_tag }}
         run: |
-          cat >release-body.md <<'EOF'
-          **Latest BHoM alpha build.**
+          set -eu
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
-          - Build: [#${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          - Commit: `${{ github.sha }}`
-          - Triggered by: `${{ github.event_name }}`
+          if [ "$INSTALL_TEST_RESULT" = "success" ]; then
+              test_status="✅ install + uninstall smoke test passed on both windows-2022 and windows-2025"
+          else
+              test_status="⚠️ install + uninstall smoke test result: \`$INSTALL_TEST_RESULT\` — see [run logs]($run_url). **Download for diagnostic / local testing only — do not promote to users.**"
+          fi
 
-          Install: download the `.msi`, double-click. Uninstall via Windows
+          if [ -n "$PREV_TAG" ]; then
+              diff_note="Diffed against [\`$PREV_TAG\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${PREV_TAG})."
+          else
+              diff_note="(No prior alpha release found — this is an initial baseline.)"
+          fi
+
+          cat >release-body.md <<EOF
+          **BHoM alpha build.**
+
+          - Build: [#${GITHUB_RUN_ID}]($run_url)
+          - Commit: \`${GITHUB_SHA}\`
+          - Triggered by: \`${GITHUB_EVENT_NAME}\`
+          - **Test status:** $test_status
+
+          Install: download the \`.msi\`, double-click. Uninstall via Windows
           "Apps & Features".
 
-          This tag is re-issued on every successful nightly build and on
-          on-demand `workflow_dispatch` runs — bookmark this page for the
-          latest alpha.
+          $diff_note
 
           ---
 
@@ -423,11 +469,11 @@ jobs:
           echo "=== Release body preview (first 80 lines) ==="
           head -80 release-body.md
 
-      - name: Publish / update rolling release
+      - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: nightly-alpha
-          name: BHoM Alpha (Nightly)
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.name }}
           body_path: release-body.md
           files: |
             artefact/*.msi
