@@ -81,21 +81,15 @@ def short(sha: str) -> str:
 
 
 def render_initial_notes(curr: dict) -> str:
-    deps = curr.get("deps", {})
-    lines = [
-        "### Initial nightly-alpha publish",
-        "",
-        "This is the first build under this tag. Subsequent releases will "
-        "diff their dep tips against this baseline.",
-        "",
-        "| Repo | Branch | Tip |",
-        "|---|---|---|",
-    ]
-    for repo in sorted(deps):
-        info = deps[repo]
-        lines.append(f"| {repo} | {info.get('branch', '?')} | `{short(info.get('sha', ''))}` |")
-    lines.append("")
-    return "\n".join(lines)
+    n = len(curr.get("deps", {}))
+    return (
+        "### Initial publish\n"
+        "\n"
+        f"This is the first build with no prior release to diff against. The full "
+        f"dep state ({n} repos, branch + tip SHA each) is in the attached "
+        "`dep-manifest.json`. Subsequent releases will show the per-dep PR diff "
+        "against the previous build instead.\n"
+    )
 
 
 def render_dep_changes(repo: str, prev_sha: str, curr_sha: str) -> list[str]:

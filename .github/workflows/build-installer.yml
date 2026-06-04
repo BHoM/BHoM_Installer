@@ -338,23 +338,23 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  # Publish the .msi as a preserved per-build Release. Tag scheme:
-  #   schedule         → alpha-{YYYYMMDD}                    (one per day)
-  #   workflow_dispatch → manual-alpha-{YYYYMMDD-HHMMSS}    (one per dispatch)
-  # No rolling tag: each release stays as history. No "skip if unchanged"
-  # gate: the build itself runs every cycle as a CI heartbeat.
+  # Publish the .msi as a preserved per-build Release. Single tag scheme for
+  # both triggers:
+  #   alpha-{YYYYMMDD-HHMMSS}
+  # The 'Triggered by:' line in the release body distinguishes scheduled
+  # nightlies from manual dispatches — no need to encode that in the tag.
+  # Each release is preserved (no rolling tag, no overwrite). History
+  # accumulates indefinitely.
   #
-  # Publishes even if install-test failed — the .msi is still useful for
-  # local diagnostic testing. The body surfaces the test result so users
-  # know whether to trust the build for production use.
+  # Gated on the entire pipeline succeeding (build + install-test). Failed
+  # builds don't appear on the Releases page; the team can still grab the
+  # .msi from the workflow run's "Upload installer artefact" Actions artifact
+  # to debug locally.
   publish-alpha:
     name: Publish alpha release
     needs: [build, install-test]
-    # always() overrides the implicit "all needs succeeded" gate so that
-    # install-test failure doesn't block publishing.
     if: |
-      always() &&
-      needs.build.result == 'success' &&
+      success() &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
       (inputs.release_type == 'alpha' || inputs.release_type == null || inputs.release_type == '')
     runs-on: ubuntu-latest
@@ -380,13 +380,8 @@ jobs:
         shell: bash
         run: |
           set -eu
-          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
-              tag="alpha-$(date -u +%Y%m%d)"
-              name="BHoM Alpha — $(date -u +%Y-%m-%d)"
-          else
-              tag="manual-alpha-$(date -u +%Y%m%d-%H%M%S)"
-              name="BHoM Alpha — manual $(date -u +'%Y-%m-%d %H:%M:%S') UTC"
-          fi
+          tag="alpha-$(date -u +%Y%m%d-%H%M%S)"
+          name="BHoM Alpha — $(date -u +'%Y-%m-%d %H:%M:%S') UTC"
           echo "tag=$tag"   >> "$GITHUB_OUTPUT"
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "::notice::Release tag = $tag"
@@ -399,16 +394,13 @@ jobs:
         run: |
           set -eu
           mkdir -p prev
-          # List releases, pick the most recent prior alpha-related release.
-          # The 'nightly-alpha$' clause is a one-time bootstrap: the sandbox
-          # already has a release under that tag from an earlier iteration of
-          # this workflow. Once the first new alpha-* release is published we
-          # can safely drop it from the pattern.
+          # Most recent prior alpha release. Tag scheme is alpha-{timestamp},
+          # so a single anchored prefix is sufficient.
           prev_tag=$(gh release list \
               --repo "$GITHUB_REPOSITORY" \
               --limit 50 \
               --json tagName,createdAt \
-              --jq "[.[] | select(.tagName | test(\"^(alpha-|manual-alpha-|nightly-alpha\$)\")) | select(.tagName != \"$CURRENT_TAG\")] | sort_by(.createdAt) | reverse | .[0].tagName // \"\"")
+              --jq "[.[] | select(.tagName | test(\"^alpha-\")) | select(.tagName != \"$CURRENT_TAG\")] | sort_by(.createdAt) | reverse | .[0].tagName // \"\"")
           if [ -n "$prev_tag" ] && gh release download "$prev_tag" \
               --repo "$GITHUB_REPOSITORY" \
               --pattern dep-manifest.json \
