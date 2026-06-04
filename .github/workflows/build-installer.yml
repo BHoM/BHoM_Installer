@@ -1,16 +1,14 @@
 # Build Installer — GitHub Actions replacement for BHoMBot's 00:45 UTC alpha build.
 #
-# Initial iteration: workflow_dispatch only, so we can trigger manually and iterate.
-# Once a green build is produced, uncomment the schedule trigger to enable nightly
-# alpha cadence matching BHoMBot.
+# Triggers:
+#   schedule           — nightly 00:45 UTC, fires on the default branch only.
+#                        Note: schedule events do NOT pass workflow inputs, so
+#                        the build defaults to release_type=alpha (handled in
+#                        Build-Installer.ps1 via 'inputs.release_type || alpha').
+#   workflow_dispatch  — manual run for iteration + ad-hoc test builds.
 #
-# Triggers (Phase 1):
-#   workflow_dispatch  — manual run for iteration + ad-hoc beta-test builds
-#   schedule (commented out for now) — nightly 00:45 UTC for alpha cadence
-#
-# Triggers to be added later:
-#   push: tags v*     — Phase 1.5, tagged release builds
-#   schedule          — uncomment once dispatch is reliable
+# Trigger to be added later:
+#   push: tags v*      — Phase 2+, tagged release builds for beta-test / stable
 
 name: Build Installer
 
@@ -30,9 +28,8 @@ on:
         required: false
         default: ''
 
-  # Uncomment once workflow_dispatch produces a clean .msi reliably:
-  # schedule:
-  #   - cron: '45 0 * * *'   # 00:45 UTC nightly, matching BHoMBot
+  schedule:
+    - cron: '45 0 * * *'   # 00:45 UTC nightly, matching BHoMBot
 
 permissions:
   contents: read
@@ -305,3 +302,106 @@ jobs:
             uninstall.utf8.log
           if-no-files-found: warn
           retention-days: 14
+
+  # Publish the validated .msi to a rolling 'nightly-alpha' Release tag.
+  # Same tag is updated on every successful nightly + dispatch build, so users
+  # have one stable URL for the latest alpha:
+  #   https://github.com/<repo>/releases/tag/nightly-alpha
+  #
+  # Gated behind install-test passing on all matrix legs. Only publishes alphas
+  # (beta and other release types are skipped here — they'd get their own tag
+  # in a future iteration). prerelease: true keeps the 'Latest release' badge
+  # reserved for semver-tagged stable builds.
+  publish-alpha:
+    name: Publish nightly-alpha release
+    needs: [build, install-test]
+    if: |
+      success() &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
+      (inputs.release_type == 'alpha' || inputs.release_type == null || inputs.release_type == '')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download .msi artefact
+        uses: actions/download-artifact@v4
+        with:
+          name: installer-${{ inputs.release_type || 'alpha' }}-${{ github.run_id }}
+          path: msi
+
+      - name: Publish / update rolling release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly-alpha
+          name: BHoM Alpha (Nightly)
+          body: |
+            **Latest BHoM alpha build.**
+
+            - Build: [#${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - Commit: `${{ github.sha }}`
+            - Triggered by: `${{ github.event_name }}`
+            - Built: `${{ github.event.repository.updated_at }}`
+
+            Install: download the `.msi`, double-click. Uninstall via Windows
+            "Apps & Features".
+
+            This tag is re-issued on every successful nightly build and on
+            on-demand `workflow_dispatch` runs — bookmark this page for the
+            latest alpha.
+          files: msi/*.msi
+          make_latest: false
+          prerelease: true
+
+  # Open a GitHub Issue when a scheduled nightly fails so the breakage doesn't
+  # rot silently overnight. Only fires on schedule events (not on dispatch —
+  # the human triggering a dispatch already knows what they're doing).
+  notify-on-failure:
+    name: Open issue on failed nightly
+    needs: [build, install-test]
+    if: failure() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          TEST_RESULT:  ${{ needs.install-test.result }}
+        run: |
+          set -eu
+          today=$(date -u +%Y-%m-%d)
+          title="[CI] Nightly alpha build failed ($today)"
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+          body=$(cat <<EOF
+          The scheduled nightly alpha build failed.
+
+          - **Run:** ${run_url}
+          - **Commit:** \`${GITHUB_SHA}\`
+          - **build job:** \`${BUILD_RESULT}\`
+          - **install-test matrix:** \`${TEST_RESULT}\`
+
+          See the run log for details. This issue auto-opens when a scheduled
+          run fails; close it once the underlying issue is resolved.
+          EOF
+          )
+
+          # Avoid spamming: if an open issue already exists with this exact
+          # title (i.e. another failure already happened today), comment on it
+          # instead of opening a duplicate.
+          existing=$(gh issue list \
+              --repo "$GITHUB_REPOSITORY" \
+              --search "in:title \"$title\"" \
+              --state open \
+              --json number --jq '.[0].number // empty')
+
+          if [ -n "$existing" ]; then
+              gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$body"
+              echo "Commented on existing issue #$existing"
+          else
+              gh issue create \
+                  --repo "$GITHUB_REPOSITORY" \
+                  --title "$title" \
+                  --body "$body"
+          fi
