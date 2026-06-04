@@ -1,16 +1,14 @@
 # Build Installer — GitHub Actions replacement for BHoMBot's 00:45 UTC alpha build.
 #
-# Initial iteration: workflow_dispatch only, so we can trigger manually and iterate.
-# Once a green build is produced, uncomment the schedule trigger to enable nightly
-# alpha cadence matching BHoMBot.
+# Triggers:
+#   schedule           — nightly 00:45 UTC, fires on the default branch only.
+#                        Note: schedule events do NOT pass workflow inputs, so
+#                        the build defaults to release_type=alpha (handled in
+#                        Build-Installer.ps1 via 'inputs.release_type || alpha').
+#   workflow_dispatch  — manual run for iteration + ad-hoc test builds.
 #
-# Triggers (Phase 1):
-#   workflow_dispatch  — manual run for iteration + ad-hoc beta-test builds
-#   schedule (commented out for now) — nightly 00:45 UTC for alpha cadence
-#
-# Triggers to be added later:
-#   push: tags v*     — Phase 1.5, tagged release builds
-#   schedule          — uncomment once dispatch is reliable
+# Trigger to be added later:
+#   push: tags v*      — Phase 2+, tagged release builds for beta-test / stable
 
 name: Build Installer
 
@@ -30,9 +28,8 @@ on:
         required: false
         default: ''
 
-  # Uncomment once workflow_dispatch produces a clean .msi reliably:
-  # schedule:
-  #   - cron: '45 0 * * *'   # 00:45 UTC nightly, matching BHoMBot
+  schedule:
+    - cron: '45 0 * * *'   # 00:45 UTC nightly, matching BHoMBot
 
 permissions:
   contents: read
@@ -57,6 +54,78 @@ jobs:
       # BuroHappold_Installer (which bundles private BHE repos), add the
       # mint-dep-token step here.
 
+      - name: Provide .NET Framework 4.0 reference assemblies
+        # InstallerCA.csproj targets .NET Framework v4.0 (matches BHoMBot's build
+        # exactly — we deliberately do not modify the installer source). The
+        # windows-2025-vs2026 image ships no v4.0 targeting pack, so MSBuild errors
+        # with MSB3644 unless v4.0 reference assemblies are present somewhere it
+        # knows to look.
+        #
+        # We restore them via the standard NuGet package and copy into the
+        # canonical Visual Studio targeting-pack location:
+        #   C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\
+        # MSBuild's GetReferenceAssemblyPaths task then resolves v4.0 there
+        # naturally, exactly as if the .NET Framework 4.0 SDK were installed.
+        # No Directory.Build.props / FrameworkPathOverride is needed — that
+        # approach broke silently because Directory.Build.props is imported
+        # before the csproj's <PropertyGroup> sets TargetFrameworkVersion, so a
+        # conditional 'TargetFrameworkVersion == v4.0' never matched.
+        #
+        # v4.8 and later TFMs are unaffected: their targeting packs live at
+        # separate per-version paths, untouched by this step.
+        run: |
+          $pkgDir = 'C:\refasms'
+          New-Item -ItemType Directory -Force -Path $pkgDir | Out-Null
+          nuget install Microsoft.NETFramework.ReferenceAssemblies.net40 `
+            -OutputDirectory $pkgDir -Version 1.0.3 -ExcludeVersion -Verbosity quiet `
+            -Source https://api.nuget.org/v3/index.json
+          $src = "$pkgDir\Microsoft.NETFramework.ReferenceAssemblies.net40\build\.NETFramework\v4.0"
+          if (-not (Test-Path "$src\mscorlib.dll")) {
+              throw "v4.0 ref assemblies missing at $src after nuget install"
+          }
+
+          $dst = 'C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0'
+          New-Item -ItemType Directory -Force -Path $dst | Out-Null
+          Copy-Item -Path "$src\*" -Destination $dst -Recurse -Force
+          Write-Host "Installed v4.0 reference assemblies to: $dst"
+          Get-ChildItem $dst -Filter '*.dll' | Measure-Object | ForEach-Object { Write-Host "  $($_.Count) DLLs present" }
+
+      - name: Pin WiX Toolset v3.11.2
+        # GHA windows-2025-vs2026 ships WiX v3.14. The v3.14 SfxCA.dll stub
+        # (bundled by MakeSfxCA into InstallerCA.CA.dll) appears to be the
+        # source of "SFXCA: Failed to create temp directory. Error code 5"
+        # on hardened Windows 11 per-user installs. v3.11.2 has been the
+        # long-stable build BHoMBot uses; pinning to that for parity until
+        # we migrate to WiX v5 in Phase 2.
+        run: |
+          Write-Host "=== WiX directories on runner (before) ==="
+          Get-ChildItem 'C:\Program Files (x86)' -Filter 'WiX*' -Directory | Select-Object FullName | Format-Table -AutoSize | Out-String | Write-Host
+
+          # Remove pre-installed WiX v3.14 so v3.11.2 installs cleanly to its own path.
+          # The choco package's underlying .exe installer no-ops if any v3.x is present,
+          # which is why our previous attempt "succeeded" without actually downgrading.
+          choco uninstall wixtoolset -y --no-progress --skip-autouninstaller-failure-check || Write-Host "(no existing choco wixtoolset to uninstall)"
+          Get-ChildItem 'C:\Program Files (x86)' -Filter 'WiX Toolset v3.*' -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+              Write-Host "Removing $($_.FullName)"
+              Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+          choco install wixtoolset --version=3.11.2 --force -y --no-progress
+
+          Write-Host ""
+          Write-Host "=== WiX directories on runner (after) ==="
+          Get-ChildItem 'C:\Program Files (x86)' -Filter 'WiX*' -Directory | Select-Object FullName | Format-Table -AutoSize | Out-String | Write-Host
+
+          $wixRoot = Get-ChildItem 'C:\Program Files (x86)' -Filter 'WiX Toolset v3.11*' -Directory -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $wixRoot) { throw "WiX 3.11 install did not produce expected path under C:\Program Files (x86)" }
+          $wixBin = Join-Path $wixRoot 'bin'
+          if (-not (Test-Path $wixBin)) { throw "WiX 3.11 install missing bin\: $wixBin" }
+
+          "WIX=$wixRoot\"   | Out-File -FilePath $env:GITHUB_ENV  -Append
+          "$wixBin"         | Out-File -FilePath $env:GITHUB_PATH -Append
+          Write-Host "Pinned WiX root: $wixRoot"
+          & "$wixBin\candle.exe" -? | Select-Object -First 1 | Write-Host
+
       - name: Build installer
         id: build
         run: |
@@ -65,16 +134,398 @@ jobs:
 
           $patchVersion = '${{ inputs.patch_version }}'
 
-          $args = @('-ReleaseType', $releaseType)
-          if ($patchVersion) { $args += @('-PatchVersion', $patchVersion) }
+          # Hashtable splat (not array) so PowerShell binds by parameter name.
+          # Array splatting was treating '-ReleaseType' as a positional value.
+          $splat = @{ ReleaseType = $releaseType }
+          if ($patchVersion) { $splat['PatchVersion'] = $patchVersion }
 
-          & "$env:GITHUB_WORKSPACE\scripts\Build-Installer.ps1" @args
+          & "$env:GITHUB_WORKSPACE\scripts\Build-Installer.ps1" @splat
+
+      - name: Generate dep manifest (for release-note diffing)
+        # Walk the cloned dep repos that sit alongside the installer checkout
+        # and record each one's (org/repo, branch, current tip SHA). The
+        # publish-alpha job downloads the previous release's copy of this file
+        # and diffs it against this one to render "what changed since last build"
+        # release notes.
+        env:
+          RELEASE_TYPE: ${{ inputs.release_type || 'alpha' }}
+        run: |
+          $depsObject = [ordered]@{}
+          Get-ChildItem 'D:\a\BHoM_Installer' -Directory -ErrorAction SilentlyContinue |
+              Where-Object { $_.Name -ne 'BHoM_Installer' -and (Test-Path (Join-Path $_.FullName '.git')) } |
+              Sort-Object Name |
+              ForEach-Object {
+                  $remoteUrl = (git -C $_.FullName config --get remote.origin.url 2>$null)
+                  if ($remoteUrl -match 'github\.com[/:]([^/]+)/([^/.]+?)(?:\.git)?$') {
+                      $orgRepo = "$($Matches[1])/$($Matches[2])"
+                      $sha = (git -C $_.FullName rev-parse HEAD 2>$null).Trim()
+                      if ($sha) {
+                          $depsObject[$orgRepo] = [ordered]@{ branch = 'develop'; sha = $sha }
+                      }
+                  }
+              }
+
+          $manifest = [ordered]@{
+              version       = 1
+              built_at      = (Get-Date).ToUniversalTime().ToString('o')
+              release_type  = $env:RELEASE_TYPE
+              main_branch   = 'develop'
+              deps          = $depsObject
+          }
+
+          $outPath = Join-Path $env:GITHUB_WORKSPACE 'Build\dep-manifest.json'
+          $manifest | ConvertTo-Json -Depth 10 | Set-Content -Path $outPath -Encoding UTF8
+          Write-Host "::notice::Wrote dep-manifest.json with $($depsObject.Count) deps"
+
+      - name: Assert .msi size is sane
+        # Catches catastrophic packaging regressions: a tiny .msi means WiX shipped
+        # nearly nothing; a huge one means something is being bundled that shouldn't
+        # be. Current builds land ~46 MB; we use a 30-100 MB envelope to allow
+        # normal growth but trip on order-of-magnitude breakage.
+        run: |
+          $msi = Get-Item '${{ github.workspace }}/Build/*.msi' | Select-Object -First 1
+          if (-not $msi) { throw "No .msi found in ${{ github.workspace }}/Build/" }
+          $mb = [math]::Round($msi.Length / 1MB, 2)
+          Write-Host "::notice::.msi size: $mb MB ($($msi.Name))"
+          if ($mb -lt 30 -or $mb -gt 100) {
+              throw ".msi size $mb MB is outside the 30-100 MB sanity range — possible packaging regression"
+          }
 
       - name: Upload installer artefact
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: installer-${{ inputs.release_type || 'alpha' }}-${{ github.run_id }}
-          path: ${{ github.workspace }}/Build/*.msi
+          path: |
+            ${{ github.workspace }}/Build/*.msi
+            ${{ github.workspace }}/Build/dep-manifest.json
           if-no-files-found: error
           retention-days: 30
+
+  # Smoke test the produced .msi: install on a vanilla Windows runner, assert
+  # log markers + post-install state, then uninstall and re-assert.
+  #
+  # Catches the class of regressions that won't surface from a successful build
+  # alone (e.g. the WiX 3.14 SfxCA temp-directory failure, broken WiX components,
+  # missing-file references, custom-action runtime exceptions). Runs as a matrix
+  # across two Windows versions so OS-specific CA / SFXCA divergence shows up.
+  # Explicit runner labels rather than windows-latest for reproducibility.
+  install-test:
+    name: Install + uninstall (${{ matrix.os }})
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Download .msi artefact
+        uses: actions/download-artifact@v4
+        with:
+          name: installer-${{ inputs.release_type || 'alpha' }}-${{ github.run_id }}
+          path: msi
+
+      - name: Install
+        run: |
+          $msi = (Get-Item msi\*.msi | Select-Object -First 1).FullName
+          Write-Host "Installing $msi"
+          $p = Start-Process msiexec -ArgumentList '/i', $msi, '/L*V', 'install.log', '/passive' -Wait -PassThru
+          Write-Host "msiexec /i exit code: $($p.ExitCode)"
+          if ($p.ExitCode -ne 0) { throw "msiexec /i failed with exit $($p.ExitCode)" }
+
+      - name: Validate install
+        run: |
+          # MSI verbose log is UTF-16LE by default. Convert for searchability.
+          Get-Content install.log -Encoding Unicode | Set-Content install.utf8.log -Encoding UTF8
+
+          # Hard fatal markers — any of these means a fatal action / engine
+          # failure that rolled back the transaction. We deliberately do NOT
+          # flag bare 'returned actual error code 1603' lines: WiX marks some
+          # custom actions Continue="yes" (WixRemoveFoldersEx, Action_RegisterAddIn,
+          # Action_UnRegisterAddInOld) and the log records the 1603 followed by
+          # "but will be translated to success due to continue marking" — those
+          # are by-design non-fatal and the real-fatal case still triggers
+          # Return value 3 + MainEngineThread 1603 which the patterns below catch.
+          $patterns = @(
+              'Return value 3',
+              'MainEngineThread is returning 1603',
+              'SFXCA: Failed'
+          )
+          $hits = Select-String -Path install.utf8.log -Pattern $patterns
+          if ($hits) {
+              $hits | ForEach-Object { Write-Host "::error::$($_.Line.Trim())" }
+              throw "Fatal markers found in install log"
+          }
+
+          # Positive success check — the engine MUST have logged a clean exit.
+          if (-not (Select-String -Path install.utf8.log -Pattern 'Installation success or error status: 0' -Quiet)) {
+              throw "Install log missing 'Installation success or error status: 0' — install did not complete cleanly"
+          }
+
+          # File-existence assertions on the things WiX components claim to ship
+          $expected = @(
+              'C:\ProgramData\BHoM\Assemblies\BHoM.dll',
+              'C:\ProgramData\BHoM\Assemblies\BHoM_Engine.dll',
+              'C:\ProgramData\BHoM\GrasshopperPlugin\BH.UI.Grasshopper.gha',
+              'C:\ProgramData\BHoM\Settings\IncludedDLLs.txt'
+          )
+          $missing = $expected | Where-Object { -not (Test-Path $_) }
+          if ($missing) {
+              $missing | ForEach-Object { Write-Host "::error::Missing post-install file: $_" }
+              throw "Expected files missing after install"
+          }
+
+          # DLL count assertion: the WiX install must place at least as many DLLs
+          # in Assemblies\ as the build manifest declares. Fewer-than-manifest = WiX
+          # dropped components silently.
+          $manifestEntries = (Get-Content 'C:\ProgramData\BHoM\Settings\IncludedDLLs.txt' | Where-Object { $_.Trim() }).Count
+          $onDiskDlls      = (Get-ChildItem 'C:\ProgramData\BHoM\Assemblies' -Filter '*.dll' -ErrorAction SilentlyContinue).Count
+          Write-Host "::notice::Assemblies on disk: $onDiskDlls    IncludedDLLs.txt manifest: $manifestEntries"
+          if ($onDiskDlls -lt $manifestEntries) {
+              throw "Only $onDiskDlls DLLs installed but manifest declares $manifestEntries — components missing"
+          }
+
+          # BHoM.dll loadability smoke: assembly must be a valid .NET assembly with
+          # a resolvable identity. We deliberately don't call GetTypes() — that
+          # requires every referenced dep to be resolvable in the load context,
+          # which is fragile for a per-file Assembly.LoadFrom. AssemblyName resolution
+          # is enough to catch "build emitted a corrupted DLL" without false fails.
+          try {
+              $asm  = [System.Reflection.Assembly]::LoadFrom('C:\ProgramData\BHoM\Assemblies\BHoM.dll')
+              $name = $asm.GetName()
+              Write-Host "::notice::BHoM.dll loaded: $($name.Name) v$($name.Version)"
+          } catch {
+              throw "BHoM.dll failed to load as a .NET assembly: $($_.Exception.Message)"
+          }
+
+          # Registry registration check + capture ProductCode for the uninstall step
+          $reg = Get-ItemProperty 'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' -ErrorAction SilentlyContinue |
+                 Where-Object { $_.DisplayName -like 'Buildings and Habitats*' } |
+                 Select-Object -First 1
+          if (-not $reg) { throw "Product not registered in Uninstall registry" }
+          Write-Host "::notice::Installed $($reg.DisplayName) $($reg.DisplayVersion)"
+          "PRODUCT_CODE=$($reg.PSChildName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Uninstall
+        run: |
+          Write-Host "Uninstalling $env:PRODUCT_CODE"
+          $p = Start-Process msiexec -ArgumentList '/x', $env:PRODUCT_CODE, '/L*V', 'uninstall.log', '/passive' -Wait -PassThru
+          Write-Host "msiexec /x exit code: $($p.ExitCode)"
+          if ($p.ExitCode -ne 0) { throw "msiexec /x failed with exit $($p.ExitCode)" }
+
+      - name: Validate uninstall
+        run: |
+          Get-Content uninstall.log -Encoding Unicode | Set-Content uninstall.utf8.log -Encoding UTF8
+          $still = Get-ItemProperty 'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' -ErrorAction SilentlyContinue |
+                   Where-Object { $_.DisplayName -like 'Buildings and Habitats*' }
+          if ($still) { throw "Product still registered in Uninstall registry after /x" }
+          Write-Host "::notice::Uninstall left registry clean"
+
+      - name: Upload install/uninstall logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: install-test-logs-${{ matrix.os }}-${{ github.run_id }}
+          path: |
+            install.log
+            install.utf8.log
+            uninstall.log
+            uninstall.utf8.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  # Publish the .msi as a preserved per-build Release. Single tag scheme for
+  # both triggers:
+  #   alpha-{YYYYMMDD-HHMMSS}
+  # The 'Triggered by:' line in the release body distinguishes scheduled
+  # nightlies from manual dispatches — no need to encode that in the tag.
+  # Each release is preserved (no rolling tag, no overwrite). History
+  # accumulates indefinitely.
+  #
+  # Gated on the entire pipeline succeeding (build + install-test). Failed
+  # builds don't appear on the Releases page; the team can still grab the
+  # .msi from the workflow run's "Upload installer artefact" Actions artifact
+  # to debug locally.
+  publish-alpha:
+    name: Publish alpha release
+    needs: [build, install-test]
+    if: |
+      success() &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
+      (inputs.release_type == 'alpha' || inputs.release_type == null || inputs.release_type == '')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout installer repo (for the notes script)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            scripts/generate_release_notes.py
+          sparse-checkout-cone-mode: false
+
+      - name: Download current .msi + dep-manifest.json
+        uses: actions/download-artifact@v4
+        with:
+          name: installer-${{ inputs.release_type || 'alpha' }}-${{ github.run_id }}
+          path: artefact
+
+      - name: Compute release tag + name
+        id: tag
+        shell: bash
+        run: |
+          set -eu
+          tag="alpha-$(date -u +%Y%m%d-%H%M%S)"
+          name="BHoM Alpha — $(date -u +'%Y-%m-%d %H:%M:%S') UTC"
+          echo "tag=$tag"   >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "::notice::Release tag = $tag"
+
+      - name: Find + download most recent prior alpha dep-manifest (for diff)
+        id: prev-manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURRENT_TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          set -eu
+          mkdir -p prev
+          # Most recent prior alpha release. Tag scheme is alpha-{timestamp},
+          # so a single anchored prefix is sufficient.
+          prev_tag=$(gh release list \
+              --repo "$GITHUB_REPOSITORY" \
+              --limit 50 \
+              --json tagName,createdAt \
+              --jq "[.[] | select(.tagName | test(\"^alpha-\")) | select(.tagName != \"$CURRENT_TAG\")] | sort_by(.createdAt) | reverse | .[0].tagName // \"\"")
+          if [ -n "$prev_tag" ] && gh release download "$prev_tag" \
+              --repo "$GITHUB_REPOSITORY" \
+              --pattern dep-manifest.json \
+              --dir prev 2>/dev/null; then
+              echo "::notice::Diffing against previous release: $prev_tag"
+              echo "path=prev/dep-manifest.json" >> "$GITHUB_OUTPUT"
+              echo "prev_tag=$prev_tag"          >> "$GITHUB_OUTPUT"
+          else
+              echo "::notice::No prior alpha release with a manifest — this will be an initial-baseline publish"
+              echo "path="     >> "$GITHUB_OUTPUT"
+              echo "prev_tag=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate dep-change release-notes section
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/generate_release_notes.py \
+              artefact/dep-manifest.json \
+              "${{ steps.prev-manifest.outputs.path }}" \
+              release-notes-section.md
+
+      - name: Compose full release body
+        env:
+          INSTALL_TEST_RESULT: ${{ needs.install-test.result }}
+          PREV_TAG:            ${{ steps.prev-manifest.outputs.prev_tag }}
+        run: |
+          set -eu
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+          if [ "$INSTALL_TEST_RESULT" = "success" ]; then
+              test_status="✅ install + uninstall smoke test passed on both windows-2022 and windows-2025"
+          else
+              test_status="⚠️ install + uninstall smoke test result: \`$INSTALL_TEST_RESULT\` — see [run logs]($run_url). **Download for diagnostic / local testing only — do not promote to users.**"
+          fi
+
+          if [ -n "$PREV_TAG" ]; then
+              diff_note="Diffed against [\`$PREV_TAG\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${PREV_TAG})."
+          else
+              diff_note="(No prior alpha release found — this is an initial baseline.)"
+          fi
+
+          cat >release-body.md <<EOF
+          **BHoM alpha build.**
+
+          - Build: [#${GITHUB_RUN_ID}]($run_url)
+          - Commit: \`${GITHUB_SHA}\`
+          - Triggered by: \`${GITHUB_EVENT_NAME}\`
+          - **Test status:** $test_status
+
+          Install: download the \`.msi\`, double-click. Uninstall via Windows
+          "Apps & Features".
+
+          $diff_note
+
+          ---
+
+          EOF
+          cat release-notes-section.md >> release-body.md
+          echo ""
+          echo "=== Release body preview (first 80 lines) ==="
+          head -80 release-body.md
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.name }}
+          body_path: release-body.md
+          files: |
+            artefact/*.msi
+            artefact/dep-manifest.json
+          make_latest: false
+          prerelease: true
+
+  # Open a GitHub Issue when a scheduled nightly fails so the breakage doesn't
+  # rot silently overnight. Only fires on schedule events (not on dispatch —
+  # the human triggering a dispatch already knows what they're doing).
+  notify-on-failure:
+    name: Open issue on failed nightly
+    needs: [build, install-test]
+    if: failure() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          TEST_RESULT:  ${{ needs.install-test.result }}
+        run: |
+          set -eu
+          today=$(date -u +%Y-%m-%d)
+          title="[CI] Nightly alpha build failed ($today)"
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+          body=$(cat <<EOF
+          The scheduled nightly alpha build failed.
+
+          - **Run:** ${run_url}
+          - **Commit:** \`${GITHUB_SHA}\`
+          - **build job:** \`${BUILD_RESULT}\`
+          - **install-test matrix:** \`${TEST_RESULT}\`
+
+          See the run log for details. This issue auto-opens when a scheduled
+          run fails; close it once the underlying issue is resolved.
+          EOF
+          )
+
+          # Avoid spamming: if an open issue already exists with this exact
+          # title (i.e. another failure already happened today), comment on it
+          # instead of opening a duplicate.
+          existing=$(gh issue list \
+              --repo "$GITHUB_REPOSITORY" \
+              --search "in:title \"$title\"" \
+              --state open \
+              --json number --jq '.[0].number // empty')
+
+          if [ -n "$existing" ]; then
+              gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$body"
+              echo "Commented on existing issue #$existing"
+          else
+              gh issue create \
+                  --repo "$GITHUB_REPOSITORY" \
+                  --title "$title" \
+                  --body "$body"
+          fi
