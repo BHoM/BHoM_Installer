@@ -65,12 +65,33 @@ jobs:
         # long-stable build BHoMBot uses; pinning to that for parity until
         # we migrate to WiX v5 in Phase 2.
         run: |
-          choco install wixtoolset --version=3.11.2 --force --allow-downgrade -y --no-progress
-          $wixBin = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
-          if (-not (Test-Path $wixBin)) { throw "WiX 3.11 install did not produce expected path: $wixBin" }
-          "WIX=$($wixBin | Split-Path -Parent)\" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "$wixBin" | Out-File -FilePath $env:GITHUB_PATH -Append
-          & "$wixBin\candle.exe" -? | Select-Object -First 1
+          Write-Host "=== WiX directories on runner (before) ==="
+          Get-ChildItem 'C:\Program Files (x86)' -Filter 'WiX*' -Directory | Select-Object FullName | Format-Table -AutoSize | Out-String | Write-Host
+
+          # Remove pre-installed WiX v3.14 so v3.11.2 installs cleanly to its own path.
+          # The choco package's underlying .exe installer no-ops if any v3.x is present,
+          # which is why our previous attempt "succeeded" without actually downgrading.
+          choco uninstall wixtoolset -y --no-progress --skip-autouninstaller-failure-check || Write-Host "(no existing choco wixtoolset to uninstall)"
+          Get-ChildItem 'C:\Program Files (x86)' -Filter 'WiX Toolset v3.*' -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+              Write-Host "Removing $($_.FullName)"
+              Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+          choco install wixtoolset --version=3.11.2 --force -y --no-progress
+
+          Write-Host ""
+          Write-Host "=== WiX directories on runner (after) ==="
+          Get-ChildItem 'C:\Program Files (x86)' -Filter 'WiX*' -Directory | Select-Object FullName | Format-Table -AutoSize | Out-String | Write-Host
+
+          $wixRoot = Get-ChildItem 'C:\Program Files (x86)' -Filter 'WiX Toolset v3.11*' -Directory -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $wixRoot) { throw "WiX 3.11 install did not produce expected path under C:\Program Files (x86)" }
+          $wixBin = Join-Path $wixRoot 'bin'
+          if (-not (Test-Path $wixBin)) { throw "WiX 3.11 install missing bin\: $wixBin" }
+
+          "WIX=$wixRoot\"   | Out-File -FilePath $env:GITHUB_ENV  -Append
+          "$wixBin"         | Out-File -FilePath $env:GITHUB_PATH -Append
+          Write-Host "Pinned WiX root: $wixRoot"
+          & "$wixBin\candle.exe" -? | Select-Object -First 1 | Write-Host
 
       - name: Build installer
         id: build
