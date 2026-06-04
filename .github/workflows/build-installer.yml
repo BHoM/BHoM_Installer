@@ -147,6 +147,8 @@ jobs:
         # publish-alpha job downloads the previous release's copy of this file
         # and diffs it against this one to render "what changed since last build"
         # release notes.
+        env:
+          RELEASE_TYPE: ${{ inputs.release_type || 'alpha' }}
         run: |
           $depsObject = [ordered]@{}
           Get-ChildItem 'D:\a\BHoM_Installer' -Directory -ErrorAction SilentlyContinue |
@@ -166,12 +168,12 @@ jobs:
           $manifest = [ordered]@{
               version       = 1
               built_at      = (Get-Date).ToUniversalTime().ToString('o')
-              release_type  = '${{ inputs.release_type || ''alpha'' }}'
+              release_type  = $env:RELEASE_TYPE
               main_branch   = 'develop'
               deps          = $depsObject
           }
 
-          $outPath = "${{ github.workspace }}/Build/dep-manifest.json"
+          $outPath = Join-Path $env:GITHUB_WORKSPACE 'Build\dep-manifest.json'
           $manifest | ConvertTo-Json -Depth 10 | Set-Content -Path $outPath -Encoding UTF8
           Write-Host "::notice::Wrote dep-manifest.json with $($depsObject.Count) deps"
 
