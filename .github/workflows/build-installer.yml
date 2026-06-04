@@ -399,13 +399,16 @@ jobs:
         run: |
           set -eu
           mkdir -p prev
-          # List releases, pick the most recent alpha-*/manual-alpha-* whose tag
-          # isn't the one we're about to publish.
+          # List releases, pick the most recent prior alpha-related release.
+          # The 'nightly-alpha$' clause is a one-time bootstrap: the sandbox
+          # already has a release under that tag from an earlier iteration of
+          # this workflow. Once the first new alpha-* release is published we
+          # can safely drop it from the pattern.
           prev_tag=$(gh release list \
               --repo "$GITHUB_REPOSITORY" \
               --limit 50 \
               --json tagName,createdAt \
-              --jq "[.[] | select(.tagName | test(\"^(alpha|manual-alpha)-\")) | select(.tagName != \"$CURRENT_TAG\")] | sort_by(.createdAt) | reverse | .[0].tagName // \"\"")
+              --jq "[.[] | select(.tagName | test(\"^(alpha-|manual-alpha-|nightly-alpha\$)\")) | select(.tagName != \"$CURRENT_TAG\")] | sort_by(.createdAt) | reverse | .[0].tagName // \"\"")
           if [ -n "$prev_tag" ] && gh release download "$prev_tag" \
               --repo "$GITHUB_REPOSITORY" \
               --pattern dep-manifest.json \
