@@ -85,14 +85,14 @@ jobs:
           # Directory.Build.props at the parent is walked-up by MSBuild for every
           # project under the workspace.
           $propsPath = 'D:\a\BHoM_Installer\Directory.Build.props'
-          $propsContent = @"
-<Project>
-  <PropertyGroup Condition=`" '`$(TargetFrameworkIdentifier)' == '.NETFramework' AND '`$(TargetFrameworkVersion)' == 'v4.0' `">
-    <FrameworkPathOverride>$refPath</FrameworkPathOverride>
-  </PropertyGroup>
-</Project>
-"@
-          Set-Content -Path $propsPath -Value $propsContent -Encoding UTF8
+          $lines = @(
+              '<Project>',
+              '  <PropertyGroup Condition=" ''$(TargetFrameworkIdentifier)'' == ''.NETFramework'' AND ''$(TargetFrameworkVersion)'' == ''v4.0'' ">',
+              "    <FrameworkPathOverride>$refPath</FrameworkPathOverride>",
+              '  </PropertyGroup>',
+              '</Project>'
+          )
+          Set-Content -Path $propsPath -Value $lines -Encoding UTF8
           Write-Host "Wrote $propsPath"
           Write-Host "FrameworkPathOverride (v4.0 only) = $refPath"
 
