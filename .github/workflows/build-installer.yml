@@ -182,3 +182,101 @@ jobs:
           path: ${{ github.workspace }}/Build/*.msi
           if-no-files-found: error
           retention-days: 30
+
+  # Smoke test the produced .msi: install on a vanilla Windows runner, assert
+  # log markers + post-install state, then uninstall and re-assert.
+  #
+  # Catches the class of regressions that won't surface from a successful build
+  # alone (e.g. the WiX 3.14 SfxCA temp-directory failure, broken WiX components,
+  # missing-file references, custom-action runtime exceptions). Runs on
+  # windows-latest rather than the BHE custom image so the environment is closer
+  # to what an end-user would see.
+  install-test:
+    name: Install + uninstall smoke test
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Download .msi artefact
+        uses: actions/download-artifact@v4
+        with:
+          name: installer-${{ inputs.release_type || 'alpha' }}-${{ github.run_id }}
+          path: msi
+
+      - name: Install
+        run: |
+          $msi = (Get-Item msi\*.msi | Select-Object -First 1).FullName
+          Write-Host "Installing $msi"
+          $p = Start-Process msiexec -ArgumentList '/i', $msi, '/L*V', 'install.log', '/passive' -Wait -PassThru
+          Write-Host "msiexec /i exit code: $($p.ExitCode)"
+          if ($p.ExitCode -ne 0) { throw "msiexec /i failed with exit $($p.ExitCode)" }
+
+      - name: Validate install
+        run: |
+          # MSI verbose log is UTF-16LE by default. Convert for searchability.
+          Get-Content install.log -Encoding Unicode | Set-Content install.utf8.log -Encoding UTF8
+
+          # Hard fatal markers — any of these means the install completed with a
+          # rolled-back transaction even if the exit code looked OK.
+          $patterns = @(
+              'Return value 3',
+              'MainEngineThread is returning 1603',
+              'SFXCA: Failed',
+              'returned actual error code 1603'
+          )
+          $hits = Select-String -Path install.utf8.log -Pattern $patterns
+          if ($hits) {
+              $hits | ForEach-Object { Write-Host "::error::$($_.Line.Trim())" }
+              throw "Fatal markers found in install log"
+          }
+
+          # File-existence assertions on the things WiX components claim to ship
+          $expected = @(
+              'C:\ProgramData\BHoM\Assemblies\BHoM.dll',
+              'C:\ProgramData\BHoM\Assemblies\BHoM_Engine.dll',
+              'C:\ProgramData\BHoM\GrasshopperPlugin\BH.UI.Grasshopper.gha'
+          )
+          $missing = $expected | Where-Object { -not (Test-Path $_) }
+          if ($missing) {
+              $missing | ForEach-Object { Write-Host "::error::Missing post-install file: $_" }
+              throw "Expected files missing after install"
+          }
+
+          # Registry registration check + capture ProductCode for the uninstall step
+          $reg = Get-ItemProperty 'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' -ErrorAction SilentlyContinue |
+                 Where-Object { $_.DisplayName -like 'Buildings and Habitats*' } |
+                 Select-Object -First 1
+          if (-not $reg) { throw "Product not registered in Uninstall registry" }
+          Write-Host "::notice::Installed $($reg.DisplayName) $($reg.DisplayVersion)"
+          "PRODUCT_CODE=$($reg.PSChildName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Uninstall
+        run: |
+          Write-Host "Uninstalling $env:PRODUCT_CODE"
+          $p = Start-Process msiexec -ArgumentList '/x', $env:PRODUCT_CODE, '/L*V', 'uninstall.log', '/passive' -Wait -PassThru
+          Write-Host "msiexec /x exit code: $($p.ExitCode)"
+          if ($p.ExitCode -ne 0) { throw "msiexec /x failed with exit $($p.ExitCode)" }
+
+      - name: Validate uninstall
+        run: |
+          Get-Content uninstall.log -Encoding Unicode | Set-Content uninstall.utf8.log -Encoding UTF8
+          $still = Get-ItemProperty 'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' -ErrorAction SilentlyContinue |
+                   Where-Object { $_.DisplayName -like 'Buildings and Habitats*' }
+          if ($still) { throw "Product still registered in Uninstall registry after /x" }
+          Write-Host "::notice::Uninstall left registry clean"
+
+      - name: Upload install/uninstall logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: install-test-logs-${{ github.run_id }}
+          path: |
+            install.log
+            install.utf8.log
+            uninstall.log
+            uninstall.utf8.log
+          if-no-files-found: warn
+          retention-days: 14
