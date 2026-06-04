@@ -219,18 +219,28 @@ jobs:
           # MSI verbose log is UTF-16LE by default. Convert for searchability.
           Get-Content install.log -Encoding Unicode | Set-Content install.utf8.log -Encoding UTF8
 
-          # Hard fatal markers — any of these means the install completed with a
-          # rolled-back transaction even if the exit code looked OK.
+          # Hard fatal markers — any of these means a fatal action / engine
+          # failure that rolled back the transaction. We deliberately do NOT
+          # flag bare 'returned actual error code 1603' lines: WiX marks some
+          # custom actions Continue="yes" (WixRemoveFoldersEx, Action_RegisterAddIn,
+          # Action_UnRegisterAddInOld) and the log records the 1603 followed by
+          # "but will be translated to success due to continue marking" — those
+          # are by-design non-fatal and the real-fatal case still triggers
+          # Return value 3 + MainEngineThread 1603 which the patterns below catch.
           $patterns = @(
               'Return value 3',
               'MainEngineThread is returning 1603',
-              'SFXCA: Failed',
-              'returned actual error code 1603'
+              'SFXCA: Failed'
           )
           $hits = Select-String -Path install.utf8.log -Pattern $patterns
           if ($hits) {
               $hits | ForEach-Object { Write-Host "::error::$($_.Line.Trim())" }
               throw "Fatal markers found in install log"
+          }
+
+          # Positive success check — the engine MUST have logged a clean exit.
+          if (-not (Select-String -Path install.utf8.log -Pattern 'Installation success or error status: 0' -Quiet)) {
+              throw "Install log missing 'Installation success or error status: 0' — install did not complete cleanly"
           }
 
           # File-existence assertions on the things WiX components claim to ship
