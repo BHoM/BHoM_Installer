@@ -275,7 +275,6 @@ $msbuildArgs = @(
     $installerSln,
     '-nologo',
     '-verbosity:minimal',
-    '-p:Configuration=Release',
     '-p:RunWixToolsOutOfProc=true',
     '-p:DeployOnBuild=true',
     "-p:ReleaseType=$ReleaseType",

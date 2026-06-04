@@ -57,6 +57,21 @@ jobs:
       # BuroHappold_Installer (which bundles private BHE repos), add the
       # mint-dep-token step here.
 
+      - name: Pin WiX Toolset v3.11.2
+        # GHA windows-2025-vs2026 ships WiX v3.14. The v3.14 SfxCA.dll stub
+        # (bundled by MakeSfxCA into InstallerCA.CA.dll) appears to be the
+        # source of "SFXCA: Failed to create temp directory. Error code 5"
+        # on hardened Windows 11 per-user installs. v3.11.2 has been the
+        # long-stable build BHoMBot uses; pinning to that for parity until
+        # we migrate to WiX v5 in Phase 2.
+        run: |
+          choco install wixtoolset --version=3.11.2 --force --allow-downgrade -y --no-progress
+          $wixBin = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+          if (-not (Test-Path $wixBin)) { throw "WiX 3.11 install did not produce expected path: $wixBin" }
+          "WIX=$($wixBin | Split-Path -Parent)\" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "$wixBin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          & "$wixBin\candle.exe" -? | Select-Object -First 1
+
       - name: Build installer
         id: build
         run: |
