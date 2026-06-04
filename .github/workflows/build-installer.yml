@@ -174,6 +174,20 @@ jobs:
 
           & "$env:GITHUB_WORKSPACE\scripts\Build-Installer.ps1" @splat
 
+      - name: Assert .msi size is sane
+        # Catches catastrophic packaging regressions: a tiny .msi means WiX shipped
+        # nearly nothing; a huge one means something is being bundled that shouldn't
+        # be. Current builds land ~46 MB; we use a 30-100 MB envelope to allow
+        # normal growth but trip on order-of-magnitude breakage.
+        run: |
+          $msi = Get-Item '${{ github.workspace }}/Build/*.msi' | Select-Object -First 1
+          if (-not $msi) { throw "No .msi found in ${{ github.workspace }}/Build/" }
+          $mb = [math]::Round($msi.Length / 1MB, 2)
+          Write-Host "::notice::.msi size: $mb MB ($($msi.Name))"
+          if ($mb -lt 30 -or $mb -gt 100) {
+              throw ".msi size $mb MB is outside the 30-100 MB sanity range — possible packaging regression"
+          }
+
       - name: Upload installer artefact
         if: success()
         uses: actions/upload-artifact@v4
@@ -188,13 +202,17 @@ jobs:
   #
   # Catches the class of regressions that won't surface from a successful build
   # alone (e.g. the WiX 3.14 SfxCA temp-directory failure, broken WiX components,
-  # missing-file references, custom-action runtime exceptions). Runs on
-  # windows-latest rather than the BHE custom image so the environment is closer
-  # to what an end-user would see.
+  # missing-file references, custom-action runtime exceptions). Runs as a matrix
+  # across two Windows versions so OS-specific CA / SFXCA divergence shows up.
+  # Explicit runner labels rather than windows-latest for reproducibility.
   install-test:
-    name: Install + uninstall smoke test
+    name: Install + uninstall (${{ matrix.os }})
     needs: build
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, windows-2025]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     defaults:
       run:
@@ -247,12 +265,36 @@ jobs:
           $expected = @(
               'C:\ProgramData\BHoM\Assemblies\BHoM.dll',
               'C:\ProgramData\BHoM\Assemblies\BHoM_Engine.dll',
-              'C:\ProgramData\BHoM\GrasshopperPlugin\BH.UI.Grasshopper.gha'
+              'C:\ProgramData\BHoM\GrasshopperPlugin\BH.UI.Grasshopper.gha',
+              'C:\ProgramData\BHoM\Settings\IncludedDLLs.txt'
           )
           $missing = $expected | Where-Object { -not (Test-Path $_) }
           if ($missing) {
               $missing | ForEach-Object { Write-Host "::error::Missing post-install file: $_" }
               throw "Expected files missing after install"
+          }
+
+          # DLL count assertion: the WiX install must place at least as many DLLs
+          # in Assemblies\ as the build manifest declares. Fewer-than-manifest = WiX
+          # dropped components silently.
+          $manifestEntries = (Get-Content 'C:\ProgramData\BHoM\Settings\IncludedDLLs.txt' | Where-Object { $_.Trim() }).Count
+          $onDiskDlls      = (Get-ChildItem 'C:\ProgramData\BHoM\Assemblies' -Filter '*.dll' -ErrorAction SilentlyContinue).Count
+          Write-Host "::notice::Assemblies on disk: $onDiskDlls    IncludedDLLs.txt manifest: $manifestEntries"
+          if ($onDiskDlls -lt $manifestEntries) {
+              throw "Only $onDiskDlls DLLs installed but manifest declares $manifestEntries — components missing"
+          }
+
+          # BHoM.dll loadability smoke: assembly must be a valid .NET assembly with
+          # a resolvable identity. We deliberately don't call GetTypes() — that
+          # requires every referenced dep to be resolvable in the load context,
+          # which is fragile for a per-file Assembly.LoadFrom. AssemblyName resolution
+          # is enough to catch "build emitted a corrupted DLL" without false fails.
+          try {
+              $asm  = [System.Reflection.Assembly]::LoadFrom('C:\ProgramData\BHoM\Assemblies\BHoM.dll')
+              $name = $asm.GetName()
+              Write-Host "::notice::BHoM.dll loaded: $($name.Name) v$($name.Version)"
+          } catch {
+              throw "BHoM.dll failed to load as a .NET assembly: $($_.Exception.Message)"
           }
 
           # Registry registration check + capture ProductCode for the uninstall step
@@ -282,7 +324,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: install-test-logs-${{ github.run_id }}
+          name: install-test-logs-${{ matrix.os }}-${{ github.run_id }}
           path: |
             install.log
             install.utf8.log
