@@ -449,10 +449,7 @@ jobs:
           fi
 
           cat >release-body.md <<EOF
-          ## BHoM Alpha Installer
-
-          This is a pre-release build of the BHoM installer produced by the
-          alpha CI pipeline. See the build provenance below before installing.
+          Pre-release build of the BHoM installer produced by the alpha CI pipeline. See the build provenance below before installing.
 
           ### Build provenance
 
@@ -462,12 +459,6 @@ jobs:
           | Commit | \`${GITHUB_SHA}\` |
           | Triggered by | \`${GITHUB_EVENT_NAME}\` |
           | Test status | $test_status |
-
-          ### Installation
-
-          Download the \`.msi\` attached to this release and run it to install.
-          To uninstall, use **Settings > Apps > Installed apps** (or the legacy
-          "Apps & Features" panel) and remove "Buildings and Habitats object Model".
 
           ### Changes
 
