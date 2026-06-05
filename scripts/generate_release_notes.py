@@ -12,8 +12,8 @@ current tip SHA so subsequent diffs have a baseline.
 
 Inputs:
   argv[1]: path to current dep-manifest.json (required)
-  argv[2]: path to previous dep-manifest.json (optional — pass an empty
-           string or missing path for an initial publish)
+  argv[2]: path to previous dep-manifest.json (optional). Pass an empty
+           string or omit for an initial publish.
   argv[3]: output Markdown path (defaults to release-notes-section.md)
 
 Environment:
@@ -67,8 +67,8 @@ def api(path: str) -> dict | list | None:
     except urllib.error.HTTPError as e:
         if e.code in (404, 422):
             return None
-        # Surface other errors but don't crash the whole publish — one dep's
-        # API failure shouldn't take down the release.
+        # Surface other errors but do not crash the whole publish. A single
+        # dep's API failure should not take down the release.
         print(f"::warning::HTTP {e.code} fetching {url}: {e.reason}", file=sys.stderr)
         return None
     except (urllib.error.URLError, TimeoutError) as e:
@@ -83,12 +83,12 @@ def short(sha: str) -> str:
 def render_initial_notes(curr: dict) -> str:
     n = len(curr.get("deps", {}))
     return (
-        "### Initial publish\n"
+        "### Initial release\n"
         "\n"
-        f"This is the first build with no prior release to diff against. The full "
-        f"dep state ({n} repos, branch + tip SHA each) is in the attached "
-        "`dep-manifest.json`. Subsequent releases will show the per-dep PR diff "
-        "against the previous build instead.\n"
+        f"No prior alpha release exists for comparison. The full set of "
+        f"dependencies ({n} repositories, each with branch and tip SHA) is "
+        "recorded in the attached `dep-manifest.json`. Future releases will "
+        "include a per-repository PR diff against the prior build.\n"
     )
 
 
@@ -101,8 +101,8 @@ def render_dep_changes(repo: str, prev_sha: str, curr_sha: str) -> list[str]:
         return [
             f"#### {repo} {header_range}",
             "",
-            f"*Compare range not resolvable (possibly a force-push on the branch). "
-            f"[See on GitHub](https://github.com/{repo}/compare/{prev_sha}...{curr_sha}).*",
+            f"_Commit range could not be resolved, possibly due to a force-push on the branch. "
+            f"[Compare on GitHub](https://github.com/{repo}/compare/{prev_sha}...{curr_sha})._",
             "",
         ]
 
@@ -111,7 +111,7 @@ def render_dep_changes(repo: str, prev_sha: str, curr_sha: str) -> list[str]:
         return [
             f"#### {repo} {header_range}",
             "",
-            "*No commits in range.*",
+            "_No commits in range._",
             "",
         ]
 
@@ -122,7 +122,7 @@ def render_dep_changes(repo: str, prev_sha: str, curr_sha: str) -> list[str]:
 
     for c in commits:
         if len(c.get("parents", [])) > 1:
-            # Skip merge commits — their content is reflected via the PR.
+            # Skip merge commits. Their content is reflected via the PR.
             continue
         sha = c["sha"]
         commit_prs = api(f"repos/{repo}/commits/{sha}/pulls") or []
@@ -140,7 +140,7 @@ def render_dep_changes(repo: str, prev_sha: str, curr_sha: str) -> list[str]:
                 "author": c["commit"]["author"]["name"],
             })
 
-    # Header line summarising what's in this section.
+    # Header line summarising the contents of this section.
     bits: list[str] = []
     if prs:
         s = "s" if len(prs) > 1 else ""
@@ -149,27 +149,27 @@ def render_dep_changes(repo: str, prev_sha: str, curr_sha: str) -> list[str]:
         s = "s" if len(direct) > 1 else ""
         bits.append(f"{len(direct)} direct commit{s}")
     if not bits:
-        # No non-merge commits, only merge commits. Should be rare.
+        # No non-merge commits; only merge commits. Should be rare.
         bits.append(f"{len(commits)} commits")
 
-    out = [f"#### {repo} {header_range} — {', '.join(bits)}", ""]
+    out = [f"#### {repo} {header_range}: {', '.join(bits)}", ""]
 
-    # Cap per-dep PR list to keep release bodies under GitHub's 125 KB limit.
+    # Cap per-repository entries to keep release bodies under GitHub's 125 KB limit.
     PR_CAP = 30
     for pr in prs[:PR_CAP]:
         author = (pr.get("user") or {}).get("login", "?")
         out.append(f"- [#{pr['number']}]({pr['html_url']}): {pr['title']} (@{author})")
     if len(prs) > PR_CAP:
-        out.append(f"- *…and {len(prs) - PR_CAP} more.*")
+        out.append(f"- _...and {len(prs) - PR_CAP} more._")
 
     if direct:
         if prs:
             out.append("")
-            out.append("*Direct commits (bypassing PR):*")
+            out.append("_Direct commits (not associated with a merged PR):_")
         for d in direct[:PR_CAP]:
             out.append(f"- {d['message']} ({d['author']}) `{short(d['sha'])}`")
         if len(direct) > PR_CAP:
-            out.append(f"- *…and {len(direct) - PR_CAP} more.*")
+            out.append(f"- _...and {len(direct) - PR_CAP} more._")
 
     out.append("")
     return out
@@ -191,12 +191,12 @@ def render_diff_notes(prev: dict, curr: dict) -> str:
     unchanged = sum(1 for r in prev_set & curr_set if prev_deps[r]["sha"] == curr_deps[r]["sha"])
     total = len(curr_set)
 
-    lines = ["### Dependency changes since last nightly", ""]
+    lines = ["### Dependency changes since previous release", ""]
 
     if not changed and not added and not removed:
-        lines.append("*No upstream changes since the previous build.*")
+        lines.append("_No upstream changes since the previous release._")
         lines.append("")
-        lines.append(f"*{total} of {total} deps unchanged.*")
+        lines.append(f"_{total} of {total} dependencies unchanged._")
         lines.append("")
         return "\n".join(lines)
 
@@ -207,7 +207,7 @@ def render_diff_notes(prev: dict, curr: dict) -> str:
         info = curr_deps[repo]
         lines.append(f"#### Newly included: {repo} `{short(info.get('sha', ''))}`")
         lines.append("")
-        lines.append("*(No prior version to compare against.)*")
+        lines.append("_No prior version exists for comparison._")
         lines.append("")
 
     if removed:
@@ -217,7 +217,7 @@ def render_diff_notes(prev: dict, curr: dict) -> str:
             lines.append(f"- {repo} (was at `{short(prev_deps[repo].get('sha', ''))}`)")
         lines.append("")
 
-    lines.append(f"*{unchanged} of {total} deps unchanged since last build.*")
+    lines.append(f"_{unchanged} of {total} dependencies unchanged since the previous release._")
     lines.append("")
     return "\n".join(lines)
 
@@ -239,7 +239,7 @@ def main() -> int:
             prev = json.load(f)
         body = render_diff_notes(prev, curr)
     else:
-        print("::notice::No previous manifest provided — emitting initial-publish baseline")
+        print("::notice::No previous manifest provided. Emitting initial-publish baseline.")
         body = render_initial_notes(curr)
 
     with open(out_path, "w", encoding="utf-8", newline="\n") as f:
