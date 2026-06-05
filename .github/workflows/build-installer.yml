@@ -240,20 +240,25 @@ jobs:
           Write-Host "msiexec /i exit code: $($p.ExitCode)"
           if ($p.ExitCode -ne 0) { throw "msiexec /i failed with exit $($p.ExitCode)" }
 
-      - name: Validate install
+      # The install assertions below are split into one step per check so that
+      # failure attribution is immediate from the GHA Actions UI without log
+      # reading. Each step runs independently; a failed step does NOT skip
+      # subsequent steps (the matrix leg still bails because the failed step
+      # fails the job, but every assertion that ran is visible).
+
+      - name: Convert install log to UTF-8 (MSI logs are UTF-16LE)
         run: |
-          # MSI verbose log is UTF-16LE by default. Convert for searchability.
           Get-Content install.log -Encoding Unicode | Set-Content install.utf8.log -Encoding UTF8
 
-          # Hard fatal markers. Any of these indicates a fatal action or
-          # engine failure that rolled back the transaction. Bare
-          # 'returned actual error code 1603' lines are deliberately not
-          # flagged: WiX marks some custom actions with Continue="yes"
-          # (WixRemoveFoldersEx, Action_RegisterAddIn, Action_UnRegisterAddInOld).
-          # The log records the 1603 followed by "but will be translated to
-          # success due to continue marking", which is by-design non-fatal.
-          # The genuinely-fatal case still produces 'Return value 3' and
-          # 'MainEngineThread is returning 1603', which the patterns below catch.
+      - name: Assert no fatal markers in install log
+        # Bare 'returned actual error code 1603' lines are deliberately not
+        # flagged: WiX marks some custom actions with Continue="yes"
+        # (WixRemoveFoldersEx, Action_RegisterAddIn, Action_UnRegisterAddInOld)
+        # and the log records the 1603 followed by 'but will be translated to
+        # success due to continue marking', which is by-design non-fatal. The
+        # genuinely-fatal case still produces 'Return value 3' and
+        # 'MainEngineThread is returning 1603', which the patterns below catch.
+        run: |
           $patterns = @(
               'Return value 3',
               'MainEngineThread is returning 1603',
@@ -265,12 +270,14 @@ jobs:
               throw "Fatal markers found in install log"
           }
 
-          # Positive success check. The engine must have logged a clean exit.
+      - name: Assert positive install-success marker
+        run: |
           if (-not (Select-String -Path install.utf8.log -Pattern 'Installation success or error status: 0' -Quiet)) {
               throw "Install log missing 'Installation success or error status: 0'. Install did not complete cleanly."
           }
 
-          # File-existence assertions on the things WiX components claim to ship
+      - name: Assert expected files exist after install
+        run: |
           $expected = @(
               'C:\ProgramData\BHoM\Assemblies\BHoM.dll',
               'C:\ProgramData\BHoM\Assemblies\BHoM_Engine.dll',
@@ -283,9 +290,11 @@ jobs:
               throw "Expected files missing after install"
           }
 
-          # DLL count assertion: the WiX install must place at least as many DLLs
-          # in Assemblies\ as the build manifest declares. Fewer-than-manifest = WiX
-          # dropped components silently.
+      - name: Assert installed DLL count meets manifest
+        # The WiX install must place at least as many DLLs in Assemblies\ as
+        # the build manifest declares. Fewer-than-manifest implies WiX dropped
+        # components silently during packaging.
+        run: |
           $manifestEntries = (Get-Content 'C:\ProgramData\BHoM\Settings\IncludedDLLs.txt' | Where-Object { $_.Trim() }).Count
           $onDiskDlls      = (Get-ChildItem 'C:\ProgramData\BHoM\Assemblies' -Filter '*.dll' -ErrorAction SilentlyContinue).Count
           Write-Host "::notice::Assemblies on disk: $onDiskDlls    IncludedDLLs.txt manifest: $manifestEntries"
@@ -293,12 +302,13 @@ jobs:
               throw "Only $onDiskDlls DLLs installed but manifest declares $manifestEntries. Components are missing."
           }
 
-          # BHoM.dll loadability smoke: assembly must be a valid .NET assembly
-          # with a resolvable identity. GetTypes() is deliberately not called
-          # because it requires every referenced dep to be resolvable in the
-          # load context, which is fragile for a per-file Assembly.LoadFrom.
-          # AssemblyName resolution is enough to catch a corrupted-DLL build
-          # without introducing false failures.
+      - name: Assert BHoM.dll loads as a .NET assembly
+        # GetTypes() is deliberately not called because it requires every
+        # referenced dep to be resolvable in the load context, which is
+        # fragile for a per-file Assembly.LoadFrom. AssemblyName resolution
+        # is enough to catch a corrupted-DLL build without introducing false
+        # failures.
+        run: |
           try {
               $asm  = [System.Reflection.Assembly]::LoadFrom('C:\ProgramData\BHoM\Assemblies\BHoM.dll')
               $name = $asm.GetName()
@@ -307,7 +317,10 @@ jobs:
               throw "BHoM.dll failed to load as a .NET assembly: $($_.Exception.Message)"
           }
 
-          # Registry registration check + capture ProductCode for the uninstall step
+      - name: Assert product is registered in Uninstall registry
+        # Also captures the ProductCode into GITHUB_ENV for the subsequent
+        # Uninstall step to use.
+        run: |
           $reg = Get-ItemProperty 'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' -ErrorAction SilentlyContinue |
                  Where-Object { $_.DisplayName -like 'Buildings and Habitats*' } |
                  Select-Object -First 1
@@ -365,6 +378,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read     # for the per-OS Test results table in the release body
     steps:
       - name: Checkout installer repo (for the release-notes scripts)
         uses: actions/checkout@v4
@@ -405,8 +419,8 @@ jobs:
           prev_tag=$(gh release list \
               --repo "$GITHUB_REPOSITORY" \
               --limit 50 \
-              --json tagName,createdAt \
-              --jq "[.[] | select(.tagName | test(\"^alpha-\")) | select(.tagName != \"$CURRENT_TAG\")] | sort_by(.createdAt) | reverse | .[0].tagName // \"\"")
+              --json tagName,publishedAt \
+              --jq "[.[] | select(.tagName | test(\"^alpha-\")) | select(.tagName != \"$CURRENT_TAG\")] | sort_by(.publishedAt) | reverse | .[0].tagName // \"\"")
           if [ -n "$prev_tag" ] && gh release download "$prev_tag" \
               --repo "$GITHUB_REPOSITORY" \
               --pattern dep-manifest.json \
@@ -431,8 +445,8 @@ jobs:
 
       - name: Compose full release body
         env:
-          INSTALL_TEST_RESULT: ${{ needs.install-test.result }}
-          PREV_TAG:            ${{ steps.prev-manifest.outputs.prev_tag }}
+          GH_TOKEN: ${{ github.token }}
+          PREV_TAG: ${{ steps.prev-manifest.outputs.prev_tag }}
         run: bash scripts/compose-release-body.sh
 
       - name: Publish release
