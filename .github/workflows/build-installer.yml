@@ -1,14 +1,14 @@
-# Build Installer — GitHub Actions replacement for BHoMBot's 00:45 UTC alpha build.
+# Build Installer. GitHub Actions replacement for BHoMBot's 00:45 UTC alpha build.
 #
 # Triggers:
-#   schedule           — nightly 00:45 UTC, fires on the default branch only.
-#                        Note: schedule events do NOT pass workflow inputs, so
-#                        the build defaults to release_type=alpha (handled in
-#                        Build-Installer.ps1 via 'inputs.release_type || alpha').
-#   workflow_dispatch  — manual run for iteration + ad-hoc test builds.
+#   schedule           Nightly 00:45 UTC, fires on the default branch only.
+#                      Schedule events do not pass workflow inputs, so the
+#                      build defaults to release_type=alpha (handled in
+#                      Build-Installer.ps1 via 'inputs.release_type || alpha').
+#   workflow_dispatch  Manual run for iteration and ad-hoc test builds.
 #
 # Trigger to be added later:
-#   push: tags v*      — Phase 2+, tagged release builds for beta-test / stable
+#   push: tags v*      Phase 2+, tagged release builds for beta-test and stable.
 
 name: Build Installer
 
@@ -55,24 +55,27 @@ jobs:
       # mint-dep-token step here.
 
       - name: Provide .NET Framework 4.0 reference assemblies
-        # InstallerCA.csproj targets .NET Framework v4.0 (matches BHoMBot's build
-        # exactly — we deliberately do not modify the installer source). The
-        # windows-2025-vs2026 image ships no v4.0 targeting pack, so MSBuild errors
-        # with MSB3644 unless v4.0 reference assemblies are present somewhere it
-        # knows to look.
+        # InstallerCA.csproj targets .NET Framework v4.0, matching BHoMBot's
+        # build exactly so that the installer source tree stays untouched. The
+        # windows-2025-vs2026 image ships no v4.0 targeting pack, so MSBuild
+        # errors with MSB3644 unless v4.0 reference assemblies are available
+        # in a location it knows to look.
         #
-        # We restore them via the standard NuGet package and copy into the
+        # Restore them via the standard NuGet package and copy into the
         # canonical Visual Studio targeting-pack location:
         #   C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\
         # MSBuild's GetReferenceAssemblyPaths task then resolves v4.0 there
-        # naturally, exactly as if the .NET Framework 4.0 SDK were installed.
-        # No Directory.Build.props / FrameworkPathOverride is needed — that
-        # approach broke silently because Directory.Build.props is imported
-        # before the csproj's <PropertyGroup> sets TargetFrameworkVersion, so a
-        # conditional 'TargetFrameworkVersion == v4.0' never matched.
+        # naturally, as if the .NET Framework 4.0 SDK were installed.
         #
-        # v4.8 and later TFMs are unaffected: their targeting packs live at
-        # separate per-version paths, untouched by this step.
+        # A Directory.Build.props / FrameworkPathOverride approach was tried
+        # first and abandoned: that file is imported into project evaluation
+        # before the csproj sets TargetFrameworkVersion, so a conditional
+        # 'TargetFrameworkVersion == v4.0' never matches and the override is
+        # never applied. The cached-binaries from earlier sessions masked this
+        # until the cache was removed.
+        #
+        # v4.8 and later TFMs are unaffected. Their targeting packs live at
+        # separate per-version paths and are not touched by this step.
         run: |
           $pkgDir = 'C:\refasms'
           New-Item -ItemType Directory -Force -Path $pkgDir | Out-Null
@@ -188,7 +191,7 @@ jobs:
           $mb = [math]::Round($msi.Length / 1MB, 2)
           Write-Host "::notice::.msi size: $mb MB ($($msi.Name))"
           if ($mb -lt 30 -or $mb -gt 100) {
-              throw ".msi size $mb MB is outside the 30-100 MB sanity range — possible packaging regression"
+              throw ".msi size $mb MB is outside the 30-100 MB sanity range, indicating a possible packaging regression"
           }
 
       - name: Upload installer artefact
@@ -242,14 +245,15 @@ jobs:
           # MSI verbose log is UTF-16LE by default. Convert for searchability.
           Get-Content install.log -Encoding Unicode | Set-Content install.utf8.log -Encoding UTF8
 
-          # Hard fatal markers — any of these means a fatal action / engine
-          # failure that rolled back the transaction. We deliberately do NOT
-          # flag bare 'returned actual error code 1603' lines: WiX marks some
-          # custom actions Continue="yes" (WixRemoveFoldersEx, Action_RegisterAddIn,
-          # Action_UnRegisterAddInOld) and the log records the 1603 followed by
-          # "but will be translated to success due to continue marking" — those
-          # are by-design non-fatal and the real-fatal case still triggers
-          # Return value 3 + MainEngineThread 1603 which the patterns below catch.
+          # Hard fatal markers. Any of these indicates a fatal action or
+          # engine failure that rolled back the transaction. Bare
+          # 'returned actual error code 1603' lines are deliberately not
+          # flagged: WiX marks some custom actions with Continue="yes"
+          # (WixRemoveFoldersEx, Action_RegisterAddIn, Action_UnRegisterAddInOld).
+          # The log records the 1603 followed by "but will be translated to
+          # success due to continue marking", which is by-design non-fatal.
+          # The genuinely-fatal case still produces 'Return value 3' and
+          # 'MainEngineThread is returning 1603', which the patterns below catch.
           $patterns = @(
               'Return value 3',
               'MainEngineThread is returning 1603',
@@ -261,9 +265,9 @@ jobs:
               throw "Fatal markers found in install log"
           }
 
-          # Positive success check — the engine MUST have logged a clean exit.
+          # Positive success check. The engine must have logged a clean exit.
           if (-not (Select-String -Path install.utf8.log -Pattern 'Installation success or error status: 0' -Quiet)) {
-              throw "Install log missing 'Installation success or error status: 0' — install did not complete cleanly"
+              throw "Install log missing 'Installation success or error status: 0'. Install did not complete cleanly."
           }
 
           # File-existence assertions on the things WiX components claim to ship
@@ -286,14 +290,15 @@ jobs:
           $onDiskDlls      = (Get-ChildItem 'C:\ProgramData\BHoM\Assemblies' -Filter '*.dll' -ErrorAction SilentlyContinue).Count
           Write-Host "::notice::Assemblies on disk: $onDiskDlls    IncludedDLLs.txt manifest: $manifestEntries"
           if ($onDiskDlls -lt $manifestEntries) {
-              throw "Only $onDiskDlls DLLs installed but manifest declares $manifestEntries — components missing"
+              throw "Only $onDiskDlls DLLs installed but manifest declares $manifestEntries. Components are missing."
           }
 
-          # BHoM.dll loadability smoke: assembly must be a valid .NET assembly with
-          # a resolvable identity. We deliberately don't call GetTypes() — that
-          # requires every referenced dep to be resolvable in the load context,
-          # which is fragile for a per-file Assembly.LoadFrom. AssemblyName resolution
-          # is enough to catch "build emitted a corrupted DLL" without false fails.
+          # BHoM.dll loadability smoke: assembly must be a valid .NET assembly
+          # with a resolvable identity. GetTypes() is deliberately not called
+          # because it requires every referenced dep to be resolvable in the
+          # load context, which is fragile for a per-file Assembly.LoadFrom.
+          # AssemblyName resolution is enough to catch a corrupted-DLL build
+          # without introducing false failures.
           try {
               $asm  = [System.Reflection.Assembly]::LoadFrom('C:\ProgramData\BHoM\Assemblies\BHoM.dll')
               $name = $asm.GetName()
@@ -342,14 +347,14 @@ jobs:
   # both triggers:
   #   alpha-{YYYYMMDD-HHMMSS}
   # The 'Triggered by:' line in the release body distinguishes scheduled
-  # nightlies from manual dispatches — no need to encode that in the tag.
-  # Each release is preserved (no rolling tag, no overwrite). History
-  # accumulates indefinitely.
+  # nightlies from manual dispatches; there is no need to encode that in the
+  # tag itself. Each release is preserved (no rolling tag, no overwrite) and
+  # history accumulates indefinitely.
   #
   # Gated on the entire pipeline succeeding (build + install-test). Failed
-  # builds don't appear on the Releases page; the team can still grab the
-  # .msi from the workflow run's "Upload installer artefact" Actions artifact
-  # to debug locally.
+  # builds do not appear on the Releases page. The .msi remains accessible
+  # from the workflow run's "Upload installer artefact" Actions artifact for
+  # local debugging when smoke tests fail.
   publish-alpha:
     name: Publish alpha release
     needs: [build, install-test]
@@ -375,13 +380,13 @@ jobs:
           name: installer-${{ inputs.release_type || 'alpha' }}-${{ github.run_id }}
           path: artefact
 
-      - name: Compute release tag + name
+      - name: Compute release tag and name
         id: tag
         shell: bash
         run: |
           set -eu
           tag="alpha-$(date -u +%Y%m%d-%H%M%S)"
-          name="BHoM Alpha — $(date -u +'%Y-%m-%d %H:%M:%S') UTC"
+          name="BHoM Alpha Installer ($(date -u +'%Y-%m-%d %H:%M:%S') UTC)"
           echo "tag=$tag"   >> "$GITHUB_OUTPUT"
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "::notice::Release tag = $tag"
@@ -409,7 +414,7 @@ jobs:
               echo "path=prev/dep-manifest.json" >> "$GITHUB_OUTPUT"
               echo "prev_tag=$prev_tag"          >> "$GITHUB_OUTPUT"
           else
-              echo "::notice::No prior alpha release with a manifest — this will be an initial-baseline publish"
+              echo "::notice::No prior alpha release with a manifest. This will be an initial-baseline publish."
               echo "path="     >> "$GITHUB_OUTPUT"
               echo "prev_tag=" >> "$GITHUB_OUTPUT"
           fi
@@ -432,31 +437,32 @@ jobs:
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
           if [ "$INSTALL_TEST_RESULT" = "success" ]; then
-              test_status="✅ install + uninstall smoke test passed on both windows-2022 and windows-2025"
+              test_status="Passed install and uninstall smoke tests on windows-2022 and windows-2025."
           else
-              test_status="⚠️ install + uninstall smoke test result: \`$INSTALL_TEST_RESULT\` — see [run logs]($run_url). **Download for diagnostic / local testing only — do not promote to users.**"
+              test_status="Smoke test result: \`$INSTALL_TEST_RESULT\`. See [run logs]($run_url) for details. This build is provided for diagnostic and local testing only and should not be promoted to users."
           fi
 
           if [ -n "$PREV_TAG" ]; then
-              diff_note="Diffed against [\`$PREV_TAG\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${PREV_TAG})."
+              diff_note="Changes are computed against [\`$PREV_TAG\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${PREV_TAG})."
           else
-              diff_note="(No prior alpha release found — this is an initial baseline.)"
+              diff_note="No prior alpha release was found, so this build is published as an initial baseline."
           fi
 
           cat >release-body.md <<EOF
-          **BHoM alpha build.**
+          Pre-release build of the BHoM installer produced by the alpha CI pipeline. See the build provenance below before installing.
 
-          - Build: [#${GITHUB_RUN_ID}]($run_url)
-          - Commit: \`${GITHUB_SHA}\`
-          - Triggered by: \`${GITHUB_EVENT_NAME}\`
-          - **Test status:** $test_status
+          ### Build provenance
 
-          Install: download the \`.msi\`, double-click. Uninstall via Windows
-          "Apps & Features".
+          | Field | Value |
+          |---|---|
+          | Build | [#${GITHUB_RUN_ID}]($run_url) |
+          | Commit | \`${GITHUB_SHA}\` |
+          | Triggered by | \`${GITHUB_EVENT_NAME}\` |
+          | Test status | $test_status |
+
+          ### Changes
 
           $diff_note
-
-          ---
 
           EOF
           cat release-notes-section.md >> release-body.md
@@ -476,9 +482,10 @@ jobs:
           make_latest: false
           prerelease: true
 
-  # Open a GitHub Issue when a scheduled nightly fails so the breakage doesn't
-  # rot silently overnight. Only fires on schedule events (not on dispatch —
-  # the human triggering a dispatch already knows what they're doing).
+  # Open a GitHub Issue when a scheduled nightly fails so the breakage does
+  # not rot silently overnight. Only fires on schedule events (not on
+  # dispatch, on the grounds that the human triggering a dispatch is already
+  # aware of the run).
   notify-on-failure:
     name: Open issue on failed nightly
     needs: [build, install-test]
@@ -504,13 +511,13 @@ jobs:
           # below is an extra signal on top of this.
           echo "::error title=Nightly alpha build failed::See $run_url"
 
-          # Skip tracking-issue creation if the repo has Issues disabled
-          # (this surfaced on the sandbox repo when notify-on-failure was
-          # first smoke-tested — gh issue create errors with 'repository has
-          # disabled issues'). The annotation above remains the signal.
+          # Skip tracking-issue creation if the repo has Issues disabled.
+          # This case surfaced on the sandbox repo when notify-on-failure was
+          # first smoke-tested: gh issue create errors with 'repository has
+          # disabled issues'. The annotation above remains the failure signal.
           has_issues=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.has_issues // false')
           if [ "$has_issues" != "true" ]; then
-              echo "::notice::Issues disabled on $GITHUB_REPOSITORY — skipping tracking-issue creation. Workflow annotation above remains the failure marker."
+              echo "::notice::Issues are disabled on $GITHUB_REPOSITORY. Skipping tracking-issue creation; the workflow annotation above remains the failure marker."
               exit 0
           fi
 

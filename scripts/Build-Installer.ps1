@@ -83,10 +83,10 @@ Write-Host "CodeLocation:   $CodeLocation"
 Write-Host "InstallerRoot:  $installerRoot"
 Write-Host "::endgroup::"
 
-# Ensure the BHoM ProgramData directories exist — each dep repo's PostBuildEvent
-# xcopies its DLLs here. The WiX BeforeBuild target then xcopies from here into
-# the installer's working dir. If these directories don't exist, the build fails
-# in confusing ways.
+# Ensure the BHoM ProgramData directories exist. Each dep repo's PostBuildEvent
+# xcopies its DLLs here, and the WiX BeforeBuild target then xcopies from here
+# into the installer's working dir. Missing directories cause confusing build
+# failures further down.
 $bhomProgramData = Join-Path $env:ProgramData 'BHoM'
 foreach ($sub in @('Assemblies', 'DataSets', 'Settings', 'Extensions/PythonCode', 'Resources', 'GrasshopperPlugin', 'Upgrades')) {
     New-Item -ItemType Directory -Force -Path (Join-Path $bhomProgramData $sub) | Out-Null
@@ -121,9 +121,9 @@ function Clone-Repo {
 
     # --depth 1 keeps the runner fast; we don't need history for builds.
     # --branch $MainBranch ensures we land on develop (matches BHoMBot's
-    # DevelopBranchName for alpha builds). If the branch doesn't exist on a dep,
-    # the clone will fail loudly — surface this rather than silently using
-    # default branch.
+    # DevelopBranchName for alpha builds). If the branch does not exist on
+    # a dep, the clone is allowed to fail loudly so the issue is visible,
+    # rather than silently falling back to the default branch.
     git clone --depth 1 --branch $MainBranch "https://github.com/$OrgRepo.git" $target 2>&1 | ForEach-Object { Write-Host "  $_" }
     if ($LASTEXITCODE -ne 0) {
         Write-Host "::warning::Clone of $OrgRepo failed on branch '$MainBranch'; retrying with default branch"
@@ -140,7 +140,7 @@ function Build-Solution {
     )
 
     if (-not (Test-Path $SlnPath)) {
-        Write-Host "::warning::No solution at $SlnPath — skipping build"
+        Write-Host "::warning::No solution at $SlnPath. Skipping build."
         return
     }
 
@@ -218,12 +218,12 @@ function Build-Configs-FromFile {
 # ─── Clone + build the dependency graph (mirrors BHoMBot's CloneInstaller.cs) ─
 
 # Order matters: core first, then adapters, then UI, then deps, then includes,
-# etc. Some files are BHE-only and won't exist in the BHoM_Installer repo —
-# Clone-And-Build-FromFile handles missing files gracefully.
+# and so on. Some files are BHE-only and will not exist in the BHoM_Installer
+# repo; Clone-And-Build-FromFile handles missing files gracefully.
 #
-# BHoMBot parallelises some of these. For this initial iteration we run
-# sequentially — easier to debug, deterministic output. Parallelism is a
-# Phase 1.5 optimisation once the workflow is stable.
+# BHoMBot parallelises some of these groups. For this initial iteration we run
+# sequentially because it is easier to debug and produces deterministic output.
+# Parallelism is a Phase 1.5 optimisation once the workflow is stable.
 
 Clone-And-Build-FromFile -FileName 'core.txt'
 Clone-And-Build-FromFile -FileName 'adapterCore.txt'
@@ -238,10 +238,10 @@ Clone-And-Build-FromFile -FileName 'revitTools_Beta.txt'  # BHE-only, absent in 
 Build-Configs-FromFile -FileName 'altConfigs.txt'
 
 # NOTE: BHoMBot calls UpdateFixedRevitVersioningTypes() here (Revit API mocks
-# for the Versioning_Toolkit build) and a 60s sleep after versioning.
-# Skipped in this initial iteration — surfaces as a build failure if it turns
-# out to matter. Will add back if Versioning_Toolkit build fails or produces
-# incorrect output.
+# for the Versioning_Toolkit build), followed by a 60-second sleep after the
+# versioning step. Both are skipped in this initial iteration. If either turns
+# out to be load-bearing, the Versioning_Toolkit build will fail or produce
+# incorrect output, at which point we add them back.
 
 Clone-And-Build-FromFile -FileName 'versioning.txt'
 
@@ -294,7 +294,7 @@ Write-Host "::endgroup::"
 # at $installerRoot\..\Build\, which is $CodeLocation\Build\).
 $buildDir = Join-Path $CodeLocation 'Build'
 if (-not (Test-Path $buildDir)) {
-    # Fallback — some local builds put it under the installer root
+    # Fallback for local builds that put the output under the installer root.
     $buildDir = Join-Path $installerRoot 'Build'
     if (-not (Test-Path $buildDir)) {
         throw "No Build directory found at $CodeLocation\Build or $installerRoot\Build"
