@@ -3,11 +3,19 @@
 #
 # Reads inputs from environment variables and writes the final body to
 # release-body.md in the current working directory. The body is composed
-# of two parts:
-#   1. A short preamble (this script) with build provenance and a link
-#      to the diff base release.
-#   2. The dependency-change section produced by generate_release_notes.py
+# of three parts:
+#   1. A short preamble with build provenance.
+#   2. A per-environment Test results table, populated from the workflow's
+#      Jobs API so it picks up every matrix leg automatically.
+#   3. The dependency-change section produced by generate_release_notes.py
 #      and read from release-notes-section.md.
+#
+# This script is only invoked when the publish gate (success() on all
+# dependent jobs) passed. Test results will therefore always show
+# 'Passed' in current behaviour, but the table form lets users see
+# which environments were exercised and click through to the per-leg job.
+# If we later add matrix legs (for example windows-11), they will
+# appear automatically without further changes here.
 #
 # Required environment:
 #   GITHUB_SERVER_URL    Provided by GitHub Actions.
@@ -15,7 +23,7 @@
 #   GITHUB_RUN_ID        Provided by GitHub Actions.
 #   GITHUB_SHA           Provided by GitHub Actions.
 #   GITHUB_EVENT_NAME    Provided by GitHub Actions.
-#   INSTALL_TEST_RESULT  'success', 'failure', 'skipped', or 'cancelled'.
+#   GH_TOKEN             Token with 'actions: read' on the repo.
 #   PREV_TAG             Prior alpha release tag for the diff base, or
 #                        empty string if no prior release exists.
 #
@@ -28,16 +36,38 @@ set -eu
 
 run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
-if [ "$INSTALL_TEST_RESULT" = "success" ]; then
-    test_status="Passed install and uninstall smoke tests on windows-2022 and windows-2025."
-else
-    test_status="Smoke test result: \`$INSTALL_TEST_RESULT\`. See [run logs]($run_url) for details. This build is provided for diagnostic and local testing only and should not be promoted to users."
-fi
-
 if [ -n "$PREV_TAG" ]; then
     diff_note="Changes are computed against [\`$PREV_TAG\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${PREV_TAG})."
 else
     diff_note="No prior alpha release was found, so this build is published as an initial baseline."
+fi
+
+# Per-OS test results from the workflow's Jobs API. Filter to install-test
+# matrix legs by name prefix; matrix substitution renders as
+# "Install + uninstall (windows-2022)" etc.
+jobs_json=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs" --paginate)
+test_results_rows=$(echo "$jobs_json" | jq -r '
+    .jobs
+    | map(select(.name | startswith("Install + uninstall (")))
+    | sort_by(.name)
+    | map(
+        "| " + (.name | sub("Install \\+ uninstall \\("; "") | sub("\\)$"; ""))
+        + " | ["
+        + (
+            if .conclusion == "success" then "Passed"
+            elif .conclusion == "failure" then "Failed"
+            elif .conclusion == "skipped" then "Skipped"
+            elif .conclusion == "cancelled" then "Cancelled"
+            else .conclusion
+            end
+          )
+        + "](" + .html_url + ") |"
+      )
+    | .[]
+')
+
+if [ -z "$test_results_rows" ]; then
+    test_results_rows="| (no matrix legs detected) | |"
 fi
 
 cat >release-body.md <<EOF
@@ -50,7 +80,12 @@ Pre-release build of the BHoM installer produced by the alpha CI pipeline. See t
 | Build | [#${GITHUB_RUN_ID}]($run_url) |
 | Commit | \`${GITHUB_SHA}\` |
 | Triggered by | \`${GITHUB_EVENT_NAME}\` |
-| Test status | $test_status |
+
+### Test results
+
+| Environment | Result |
+|---|---|
+${test_results_rows}
 
 ### Changes
 
