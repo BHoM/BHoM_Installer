@@ -3,6 +3,10 @@
 ###############################################################################
 * text=auto
 
+# Shell scripts must end with LF on every platform; they run on Linux runners
+# where CRLF would break the shebang ('/bin/bash^M: bad interpreter').
+*.sh text eol=lf
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #

@@ -366,12 +366,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout installer repo (for the notes script)
+      - name: Checkout installer repo (for the release-notes scripts)
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
           sparse-checkout: |
             scripts/generate_release_notes.py
+            scripts/compose-release-body.sh
           sparse-checkout-cone-mode: false
 
       - name: Download current .msi + dep-manifest.json
@@ -432,43 +433,7 @@ jobs:
         env:
           INSTALL_TEST_RESULT: ${{ needs.install-test.result }}
           PREV_TAG:            ${{ steps.prev-manifest.outputs.prev_tag }}
-        run: |
-          set -eu
-          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-
-          if [ "$INSTALL_TEST_RESULT" = "success" ]; then
-              test_status="Passed install and uninstall smoke tests on windows-2022 and windows-2025."
-          else
-              test_status="Smoke test result: \`$INSTALL_TEST_RESULT\`. See [run logs]($run_url) for details. This build is provided for diagnostic and local testing only and should not be promoted to users."
-          fi
-
-          if [ -n "$PREV_TAG" ]; then
-              diff_note="Changes are computed against [\`$PREV_TAG\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${PREV_TAG})."
-          else
-              diff_note="No prior alpha release was found, so this build is published as an initial baseline."
-          fi
-
-          cat >release-body.md <<EOF
-          Pre-release build of the BHoM installer produced by the alpha CI pipeline. See the build provenance below before installing.
-
-          ### Build provenance
-
-          | Field | Value |
-          |---|---|
-          | Build | [#${GITHUB_RUN_ID}]($run_url) |
-          | Commit | \`${GITHUB_SHA}\` |
-          | Triggered by | \`${GITHUB_EVENT_NAME}\` |
-          | Test status | $test_status |
-
-          ### Changes
-
-          $diff_note
-
-          EOF
-          cat release-notes-section.md >> release-body.md
-          echo ""
-          echo "=== Release body preview (first 80 lines) ==="
-          head -80 release-body.md
+        run: bash scripts/compose-release-body.sh
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
@@ -494,61 +459,17 @@ jobs:
     permissions:
       issues: write
     steps:
+      - name: Checkout installer repo (for the notify script)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            scripts/notify-on-failure.sh
+          sparse-checkout-cone-mode: false
+
       - name: Open or update tracking issue
         env:
           GH_TOKEN: ${{ github.token }}
           BUILD_RESULT: ${{ needs.build.result }}
           TEST_RESULT:  ${{ needs.install-test.result }}
-        run: |
-          set -eu
-          today=$(date -u +%Y-%m-%d)
-          title="[CI] Nightly alpha build failed ($today)"
-          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-
-          # ALWAYS emit a workflow-page-visible annotation. This is the lower
-          # bound: a failure indicator that's visible regardless of whether
-          # the consumer repo has Issues enabled. The tracking-issue creation
-          # below is an extra signal on top of this.
-          echo "::error title=Nightly alpha build failed::See $run_url"
-
-          # Skip tracking-issue creation if the repo has Issues disabled.
-          # This case surfaced on the sandbox repo when notify-on-failure was
-          # first smoke-tested: gh issue create errors with 'repository has
-          # disabled issues'. The annotation above remains the failure signal.
-          has_issues=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.has_issues // false')
-          if [ "$has_issues" != "true" ]; then
-              echo "::notice::Issues are disabled on $GITHUB_REPOSITORY. Skipping tracking-issue creation; the workflow annotation above remains the failure marker."
-              exit 0
-          fi
-
-          body=$(cat <<EOF
-          The scheduled nightly alpha build failed.
-
-          - **Run:** ${run_url}
-          - **Commit:** \`${GITHUB_SHA}\`
-          - **build job:** \`${BUILD_RESULT}\`
-          - **install-test matrix:** \`${TEST_RESULT}\`
-
-          See the run log for details. This issue auto-opens when a scheduled
-          run fails; close it once the underlying issue is resolved.
-          EOF
-          )
-
-          # Avoid spamming: if an open issue already exists with this exact
-          # title (i.e. another failure already happened today), comment on it
-          # instead of opening a duplicate.
-          existing=$(gh issue list \
-              --repo "$GITHUB_REPOSITORY" \
-              --search "in:title \"$title\"" \
-              --state open \
-              --json number --jq '.[0].number // empty')
-
-          if [ -n "$existing" ]; then
-              gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$body"
-              echo "Commented on existing issue #$existing"
-          else
-              gh issue create \
-                  --repo "$GITHUB_REPOSITORY" \
-                  --title "$title" \
-                  --body "$body"
-          fi
+        run: bash scripts/notify-on-failure.sh
