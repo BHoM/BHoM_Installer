@@ -18,46 +18,52 @@
 # appear automatically without further changes here.
 #
 # Required environment:
+#   SOURCE_BRANCH        Source branch that built this artefact, from resolve.
+#   GITHUB_EVENT_NAME    Provided by GitHub Actions. Used to detect non-canonical workflow_dispatch.
 #   BUILT_AT             ISO8601 UTC timestamp from dep-manifest.json's built_at field.
 #   GITHUB_SERVER_URL    Provided by GitHub Actions.
 #   GITHUB_REPOSITORY    Provided by GitHub Actions.
 #   GITHUB_RUN_ID        Provided by GitHub Actions.
 #   GITHUB_SHA           Provided by GitHub Actions.
-#   GITHUB_EVENT_NAME    Provided by GitHub Actions.
 #   GH_TOKEN             Token with 'actions: read' on the repo.
 #   RELEASE_TYPE         'alpha' or 'beta'. Drives the intro sentence.
 #   IS_PRERELEASE        'true' or 'false'. Drives the intro sentence.
-#   PREV_TAG             Prior release tag for the diff base, or empty
-#                        string if no prior release exists.
 #
-# Required local file:
+# Optional local file:
 #   release-notes-section.md  Output from generate_release_notes.py.
+#                             Required when the canonical render branch fires
+#                             (i.e. when source_branch=develop). Otherwise the
+#                             non-canonical warning block is emitted instead.
 #
 # Output:
-#   release-body.md           Final body, ready for softprops/action-gh-release.
+#   release-body.md      Final body, ready for softprops/action-gh-release.
 set -eu
 
 run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
-if [ -n "$PREV_TAG" ]; then
-    diff_note="Changes are computed against [\`$PREV_TAG\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${PREV_TAG})."
-else
-    diff_note="No prior release was found, so this build is published as an initial baseline."
+# Decide whether this build is on the canonical lineage. Non-canonical means
+# the user dispatched with a non-develop source_branch. push events (final
+# releases) always use main, but that is the canonical final-release path;
+# only workflow_dispatch with non-develop is treated as non-canonical.
+is_non_canonical="false"
+if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ "${SOURCE_BRANCH}" != "develop" ]; then
+    is_non_canonical="true"
 fi
 
-# Intro sentence varies by release flavour. Three cases:
-#   alpha prerelease      'Pre-release alpha build of the BHoM installer...'
-#   beta prerelease       'Pre-release beta build of the BHoM installer...'
-#   beta release (tag)    'Release build of the BHoM installer...'
+# Intro sentence varies by flavour.
 if [ "$IS_PRERELEASE" = "true" ]; then
     intro="Pre-release ${RELEASE_TYPE} build of the BHoM installer produced by the CI pipeline. See the build provenance below before installing."
 else
     intro="Release build of the BHoM installer produced by the CI pipeline from a tagged commit on main."
 fi
 
-# Per-OS test results from the workflow's Jobs API. Filter to install-test
-# matrix legs by name prefix; matrix substitution renders as
-# "Install + uninstall (windows-2022)" etc.
+# Optional "Source branch" provenance row, only when non-canonical.
+source_branch_row=""
+if [ "$is_non_canonical" = "true" ]; then
+    source_branch_row="| Source branch | \`${SOURCE_BRANCH}\` |"
+fi
+
+# Per-OS test results from the workflow's Jobs API.
 jobs_json=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs" --paginate)
 test_results_rows=$(echo "$jobs_json" | jq -r '
     .jobs
@@ -83,6 +89,7 @@ if [ -z "$test_results_rows" ]; then
     test_results_rows="| (no matrix legs detected) | |"
 fi
 
+# Compose the head of the body.
 cat >release-body.md <<EOF
 ${intro}
 
@@ -94,6 +101,7 @@ ${intro}
 | Built at | \`${BUILT_AT}\` |
 | Commit | \`${GITHUB_SHA}\` |
 | Triggered by | \`${GITHUB_EVENT_NAME}\` |
+${source_branch_row}
 
 ### Test results
 
@@ -101,12 +109,25 @@ ${intro}
 |---|---|
 ${test_results_rows}
 
-### Changes
-
-$diff_note
-
 EOF
-cat release-notes-section.md >> release-body.md
+
+# Three render branches for the diff section.
+if [ "$is_non_canonical" = "true" ]; then
+    # Warning block. No diff section.
+    cat >>release-body.md <<EOF
+> Non-default source branch. This build was produced from \`${SOURCE_BRANCH}\`, not \`develop\`. The changelog is omitted because a build from \`${SOURCE_BRANCH}\` cannot be compared meaningfully against develop-sourced releases.
+>
+> Dependency branches and commit SHAs are recorded in the attached \`dep-manifest.json\`. For develop-sourced builds, see the [releases page](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases).
+EOF
+else
+    # Canonical path. The python script emits its own heading
+    # (### Changes since {anchor} or ### Initial release).
+    if [ -f release-notes-section.md ]; then
+        cat release-notes-section.md >> release-body.md
+    else
+        printf '### Initial release\n\nNo dependency diff section was produced for this build.\n' >> release-body.md
+    fi
+fi
 
 echo ""
 echo "=== Release body preview (first 80 lines) ==="
