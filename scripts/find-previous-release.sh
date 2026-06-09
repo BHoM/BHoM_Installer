@@ -85,6 +85,23 @@ select_anchor() {
         return 0
     fi
 
+    # Rule B: patches (P > 0 on a stable tag, no prerelease).
+    if [ "$is_prerelease" = "false" ] && [ "$p" -gt 0 ]; then
+        local target="v${m}.${n}.0"
+        local c
+        for c in "${candidates[@]}"; do
+            local c_tag="${c##* }"
+            if [ "$c_tag" = "$target" ]; then
+                printf 'anchor_tag=%s\n' "$target"
+                printf 'anchor_kind=stable\n'
+                return 0
+            fi
+        done
+        printf 'anchor_tag=\n'
+        printf 'anchor_kind=none\n'
+        return 0
+    fi
+
     # Rule A: pre-releases and v{M}.{N}.0 finals.
     # Filter to candidates strictly below the current M.N, then pick the
     # SemVer-highest (M', N', P') tuple.
@@ -211,6 +228,27 @@ self_test() {
     assert_equal "case 11: v9.3.0-alpha anchors against highest M.N stable v9.2.5" \
         "anchor_tag=v9.2.5" \
         "$(echo "$out" | grep '^anchor_tag=')"
+
+    # Case 6: patch v9.2.1 with v9.2.0 shipped -> v9.2.0
+    lookup_releases() { printf '%s\n' "v9.1.0" "v9.2.0"; }
+    out=$(main "v9.2.1")
+    assert_equal "case 6: patch v9.2.1 -> v9.2.0" \
+        "anchor_tag=v9.2.0" \
+        "$(echo "$out" | grep '^anchor_tag=')"
+
+    # Case 7: patch v9.2.5 with v9.2.0-v9.2.4 -> v9.2.0 (cumulative within patch series)
+    lookup_releases() { printf '%s\n' "v9.1.0" "v9.2.0" "v9.2.1" "v9.2.2" "v9.2.3" "v9.2.4"; }
+    out=$(main "v9.2.5")
+    assert_equal "case 7: patch v9.2.5 -> v9.2.0 (cumulative)" \
+        "anchor_tag=v9.2.0" \
+        "$(echo "$out" | grep '^anchor_tag=')"
+
+    # Case 8: patch with no v{M}.{N}.0 (defensive) -> kind=none
+    lookup_releases() { printf '%s\n' "v9.1.0"; }
+    out=$(main "v9.2.1")
+    assert_equal "case 8: patch with no v.0 -> anchor_kind=none" \
+        "anchor_kind=none" \
+        "$(echo "$out" | grep '^anchor_kind=')"
 
     echo
     echo "Results: $pass passed, $fail failed"
