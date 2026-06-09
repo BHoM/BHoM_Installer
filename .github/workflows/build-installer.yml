@@ -487,43 +487,43 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "::notice::Release tag = $tag"
 
-      - name: Find + download previous dep-manifest (for diff)
-        id: prev-manifest
+      - name: Find canonical anchor
+        id: anchor
         env:
           GH_TOKEN: ${{ github.token }}
-          CURRENT_TAG: ${{ steps.tag.outputs.tag }}
+          RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+        run: bash scripts/find-previous-release.sh "$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Download anchor's dep-manifest
+        id: prev-manifest
+        if: needs.resolve.outputs.source_branch == 'develop' && steps.anchor.outputs.anchor_kind == 'stable'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANCHOR_TAG: ${{ steps.anchor.outputs.anchor_tag }}
         run: |
           set -eu
           mkdir -p prev
-          # Most recent prior alpha, beta, or v* release. Sorting by
-          # publishedAt to avoid the createdAt collision quirk where same-day
-          # releases share an underlying-tag-resource timestamp.
-          prev_tag=$(gh release list \
-              --repo "$GITHUB_REPOSITORY" \
-              --limit 50 \
-              --json tagName,publishedAt \
-              --jq "[.[] | select(.tagName | test(\"^(alpha-|beta-|v)\")) | select(.tagName != \"$CURRENT_TAG\")] | sort_by(.publishedAt) | reverse | .[0].tagName // \"\"")
-          if [ -n "$prev_tag" ] && gh release download "$prev_tag" \
+          if gh release download "$ANCHOR_TAG" \
               --repo "$GITHUB_REPOSITORY" \
               --pattern dep-manifest.json \
               --dir prev 2>/dev/null; then
-              echo "::notice::Diffing against previous release: $prev_tag"
+              echo "::notice::Anchoring against $ANCHOR_TAG"
               echo "path=prev/dep-manifest.json" >> "$GITHUB_OUTPUT"
-              echo "prev_tag=$prev_tag"          >> "$GITHUB_OUTPUT"
           else
-              echo "::notice::No prior release with a dep-manifest. Publishing as an initial-baseline release."
-              echo "path="     >> "$GITHUB_OUTPUT"
-              echo "prev_tag=" >> "$GITHUB_OUTPUT"
+              echo "::warning::Could not download dep-manifest from $ANCHOR_TAG; rendering initial-baseline section."
+              echo "path=" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Generate dep-change release-notes section
+        if: needs.resolve.outputs.source_branch == 'develop' && steps.anchor.outputs.anchor_kind == 'stable' && steps.prev-manifest.outputs.path != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           python3 scripts/generate_release_notes.py \
               artefact/dep-manifest.json \
               "${{ steps.prev-manifest.outputs.path }}" \
-              release-notes-section.md
+              release-notes-section.md \
+              "${{ steps.anchor.outputs.anchor_tag }}"
 
       - name: Extract built_at from dep-manifest
         id: built-at
@@ -536,7 +536,9 @@ jobs:
       - name: Compose full release body
         env:
           GH_TOKEN:      ${{ github.token }}
-          PREV_TAG:      ${{ steps.prev-manifest.outputs.prev_tag }}
+          ANCHOR_TAG:    ${{ steps.anchor.outputs.anchor_tag }}
+          ANCHOR_KIND:   ${{ steps.anchor.outputs.anchor_kind }}
+          SOURCE_BRANCH: ${{ needs.resolve.outputs.source_branch }}
           RELEASE_TYPE:  ${{ needs.resolve.outputs.release_type }}
           IS_PRERELEASE: ${{ needs.resolve.outputs.prerelease }}
           BUILT_AT:      ${{ steps.built-at.outputs.value }}
