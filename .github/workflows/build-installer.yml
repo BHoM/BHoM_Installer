@@ -536,8 +536,6 @@ jobs:
       - name: Compose full release body
         env:
           GH_TOKEN:      ${{ github.token }}
-          ANCHOR_TAG:    ${{ steps.anchor.outputs.anchor_tag }}
-          ANCHOR_KIND:   ${{ steps.anchor.outputs.anchor_kind }}
           SOURCE_BRANCH: ${{ needs.resolve.outputs.source_branch }}
           RELEASE_TYPE:  ${{ needs.resolve.outputs.release_type }}
           IS_PRERELEASE: ${{ needs.resolve.outputs.prerelease }}
