@@ -175,7 +175,7 @@ def render_dep_changes(repo: str, prev_sha: str, curr_sha: str) -> list[str]:
     return out
 
 
-def render_diff_notes(prev: dict, curr: dict) -> str:
+def render_diff_notes(prev: dict, curr: dict, anchor_tag: str = "") -> str:
     prev_deps = prev.get("deps", {})
     curr_deps = curr.get("deps", {})
     prev_set = set(prev_deps)
@@ -191,7 +191,8 @@ def render_diff_notes(prev: dict, curr: dict) -> str:
     unchanged = sum(1 for r in prev_set & curr_set if prev_deps[r]["sha"] == curr_deps[r]["sha"])
     total = len(curr_set)
 
-    lines = ["### Dependency changes since previous release", ""]
+    heading = f"### Changes since {anchor_tag}" if anchor_tag else "### Dependency changes since previous release"
+    lines = [heading, ""]
 
     if not changed and not added and not removed:
         lines.append("_No upstream changes since the previous release._")
@@ -224,12 +225,16 @@ def render_diff_notes(prev: dict, curr: dict) -> str:
 
 def main() -> int:
     if len(sys.argv) < 2:
-        print("usage: generate_release_notes.py <current.json> [<previous.json>] [<out.md>]", file=sys.stderr)
+        print(
+            "usage: generate_release_notes.py <current.json> [<previous.json>] [<out.md>] [<anchor_tag>]",
+            file=sys.stderr,
+        )
         return 2
 
     curr_path = sys.argv[1]
     prev_path = sys.argv[2] if len(sys.argv) > 2 else ""
     out_path = sys.argv[3] if len(sys.argv) > 3 else "release-notes-section.md"
+    anchor_tag = sys.argv[4] if len(sys.argv) > 4 else ""
 
     with open(curr_path) as f:
         curr = json.load(f)
@@ -237,7 +242,7 @@ def main() -> int:
     if prev_path and os.path.isfile(prev_path):
         with open(prev_path) as f:
             prev = json.load(f)
-        body = render_diff_notes(prev, curr)
+        body = render_diff_notes(prev, curr, anchor_tag)
     else:
         print("::notice::No previous manifest provided. Emitting initial-publish baseline.")
         body = render_initial_notes(curr)
