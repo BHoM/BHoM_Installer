@@ -64,9 +64,61 @@ parse_release_tag() {
 # Reads REQ_M, REQ_N, REQ_P, REQ_IS_PRERELEASE set by parse_release_tag.
 # Writes anchor_tag and anchor_kind to stdout as KEY=VALUE pairs.
 select_anchor() {
-    # Stub. Implemented in Task 2.
-    printf 'anchor_tag=\n'
-    printf 'anchor_kind=none\n'
+    local current_tag="$1"
+    local m="$REQ_M" n="$REQ_N" p="$REQ_P"
+    local is_prerelease="$REQ_IS_PRERELEASE"
+
+    # Collect stable candidates from lookup_releases, parsed as (M N P tag) rows.
+    local candidates=()
+    local tag stable_m stable_n stable_p
+    while IFS= read -r tag; do
+        [ -z "$tag" ] && continue
+        [ "$tag" = "$current_tag" ] && continue   # Self-exclusion
+        if read -r stable_m stable_n stable_p < <(parse_stable_tag "$tag" 2>/dev/null); then
+            candidates+=("$stable_m $stable_n $stable_p $tag")
+        fi
+    done < <(lookup_releases)
+
+    if [ "${#candidates[@]}" -eq 0 ]; then
+        printf 'anchor_tag=\n'
+        printf 'anchor_kind=none\n'
+        return 0
+    fi
+
+    # Rule A: pre-releases and v{M}.{N}.0 finals.
+    # Filter to candidates strictly below the current M.N, then pick the
+    # SemVer-highest (M', N', P') tuple.
+    local best_m=-1 best_n=-1 best_p=-1 best_tag=""
+    local c c_m c_n c_p c_tag
+    for c in "${candidates[@]}"; do
+        # shellcheck disable=SC2206
+        local parts=($c)
+        c_m="${parts[0]}"
+        c_n="${parts[1]}"
+        c_p="${parts[2]}"
+        c_tag="${parts[3]}"
+        # Strict (M', N') < (M, N).
+        if [ "$c_m" -lt "$m" ] \
+           || { [ "$c_m" -eq "$m" ] && [ "$c_n" -lt "$n" ]; }; then
+            # SemVer-descending pick.
+            if [ "$c_m" -gt "$best_m" ] \
+               || { [ "$c_m" -eq "$best_m" ] && [ "$c_n" -gt "$best_n" ]; } \
+               || { [ "$c_m" -eq "$best_m" ] && [ "$c_n" -eq "$best_n" ] && [ "$c_p" -gt "$best_p" ]; }; then
+                best_m="$c_m"
+                best_n="$c_n"
+                best_p="$c_p"
+                best_tag="$c_tag"
+            fi
+        fi
+    done
+
+    if [ -n "$best_tag" ]; then
+        printf 'anchor_tag=%s\n' "$best_tag"
+        printf 'anchor_kind=stable\n'
+    else
+        printf 'anchor_tag=\n'
+        printf 'anchor_kind=none\n'
+    fi
 }
 
 main() {
@@ -102,6 +154,27 @@ self_test() {
         "$(echo "$out" | grep '^anchor_kind=')"
     assert_equal "case 1: no prior stable -> anchor_tag empty" \
         "anchor_tag=" \
+        "$(echo "$out" | grep '^anchor_tag=')"
+
+    # Case 2: v9.1.0 prior -> v9.1.0
+    lookup_releases() { printf '%s\n' "v9.1.0"; }
+    out=$(main "v9.2.0-alpha.260605")
+    assert_equal "case 2: v9.1.0 prior -> v9.1.0" \
+        "anchor_tag=v9.1.0" \
+        "$(echo "$out" | grep '^anchor_tag=')"
+
+    # Case 3: v9.1.0 + v9.1.2 prior -> v9.1.2 (highest patch in M.N wins)
+    lookup_releases() { printf '%s\n' "v9.1.0" "v9.1.2"; }
+    out=$(main "v9.2.0-alpha.260605")
+    assert_equal "case 3: v9.1.0 and v9.1.2 prior -> v9.1.2" \
+        "anchor_tag=v9.1.2" \
+        "$(echo "$out" | grep '^anchor_tag=')"
+
+    # Case 12: SemVer sort beats back-port publish order
+    lookup_releases() { printf '%s\n' "v9.1.3" "v9.2.0" "v9.1.0"; }
+    out=$(main "v9.3.0-alpha.260801")
+    assert_equal "case 12: SemVer sort beats back-port publish order" \
+        "anchor_tag=v9.2.0" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
     echo
