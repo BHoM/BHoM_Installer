@@ -177,6 +177,41 @@ self_test() {
         "anchor_tag=v9.2.0" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
+    # Case 4: ignores alpha/beta tags as candidates
+    lookup_releases() { printf '%s\n' "v9.1.0-alpha.260101" "v9.1.0-beta.1" "v9.1.0"; }
+    out=$(main "v9.2.0-alpha.260605")
+    assert_equal "case 4: only stable tags are candidates" \
+        "anchor_tag=v9.1.0" \
+        "$(echo "$out" | grep '^anchor_tag=')"
+
+    # Case 5: final v9.2.0 with v9.1.0 + v9.1.2 prior -> v9.1.2
+    lookup_releases() { printf '%s\n' "v9.1.0" "v9.1.2"; }
+    out=$(main "v9.2.0")
+    assert_equal "case 5: final v9.2.0 anchors against v9.1.2" \
+        "anchor_tag=v9.1.2" \
+        "$(echo "$out" | grep '^anchor_tag=')"
+
+    # Case 9: current tag never anchored to itself
+    lookup_releases() { printf '%s\n' "v9.2.0-alpha.260605" "v9.1.0"; }
+    out=$(main "v9.2.0-alpha.260605")
+    assert_equal "case 9: self never returned as anchor" \
+        "anchor_tag=v9.1.0" \
+        "$(echo "$out" | grep '^anchor_tag=')"
+
+    # Case 10: double-digit version
+    lookup_releases() { printf '%s\n' "v10.13.5"; }
+    out=$(main "v10.14.0-alpha.270101")
+    assert_equal "case 10: double-digit version anchors correctly" \
+        "anchor_tag=v10.13.5" \
+        "$(echo "$out" | grep '^anchor_tag=')"
+
+    # Case 11: v9.3.0-alpha with v9.2.5 latest stable -> v9.2.5
+    lookup_releases() { printf '%s\n' "v9.2.0" "v9.2.5" "v9.1.0"; }
+    out=$(main "v9.3.0-alpha.260801")
+    assert_equal "case 11: v9.3.0-alpha anchors against highest M.N stable v9.2.5" \
+        "anchor_tag=v9.2.5" \
+        "$(echo "$out" | grep '^anchor_tag=')"
+
     echo
     echo "Results: $pass passed, $fail failed"
     [ "$fail" -eq 0 ]
