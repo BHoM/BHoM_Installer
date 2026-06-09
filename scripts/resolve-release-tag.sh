@@ -152,6 +152,17 @@ assert_release_not_already_published() {
     fi
 }
 
+# Conflict rule 6: beta dispatches must build from develop. The silent
+# override in earlier versions was a UX bug. The user's source_branch input
+# was discarded with no signal. Fail fast instead so the user notices.
+assert_beta_source_branch_is_develop() {
+    local in_branch="$1"
+    if [ -n "$in_branch" ] && [ "$in_branch" != "develop" ]; then
+        err "Beta dispatches must build from develop. Got source_branch='$in_branch'. Re-dispatch with source_branch=develop (or leave it empty), or use release_type=alpha to build from '$in_branch'."
+        return 2
+    fi
+}
+
 # Top-level orchestrator. Reads workflow context from env, computes the
 # tag and outputs, runs conflict-prevention rules. Writes KEY=VALUE pairs
 # to stdout (intended to be appended to $GITHUB_OUTPUT).
@@ -190,6 +201,7 @@ resolve_main() {
                     # msi_patch_version="" — Build-Installer.ps1 defaults to yyMMdd.
                     ;;
                 beta)
+                    assert_beta_source_branch_is_develop "$in_branch" || return 2
                     # Beta dispatch always builds from develop regardless of input.
                     source_branch=develop
                     assert_no_shipped_release_for "$wix_m" "$wix_n" || return 2
@@ -414,7 +426,7 @@ EOF
 
     # workflow_dispatch beta -> beta-pre-release.
     export GITHUB_EVENT_NAME=workflow_dispatch GITHUB_REF_NAME=develop \
-        INPUT_RELEASE_TYPE=beta INPUT_SOURCE_BRANCH=feature/test
+        INPUT_RELEASE_TYPE=beta INPUT_SOURCE_BRANCH=develop
     out=$(lookup_tags()    { :; }; \
           lookup_releases(){ :; }; \
           resolve_main 2>/dev/null)
@@ -488,6 +500,35 @@ EOF
         *"already been released"*"exit=2") assert_equal "rule 3 trips on alpha when v9.2.0 shipped" "ok" "ok" ;;
         *) assert_equal "rule 3 trips on alpha when v9.2.0 shipped" "ok" "got: $out" ;;
     esac
+
+    # Rule 6: beta dispatch with feature branch -> exit 2
+    export GITHUB_EVENT_NAME=workflow_dispatch GITHUB_REF_NAME=develop \
+        INPUT_RELEASE_TYPE=beta INPUT_SOURCE_BRANCH=feature/X
+    out=$(lookup_tags()    { :; }; \
+          lookup_releases(){ :; }; \
+          resolve_main 2>&1 >/dev/null; echo "exit=$?")
+    case "$out" in
+        *"Beta dispatches must build from develop"*"exit=2") assert_equal "rule 6: beta + feature/X fails" "ok" "ok" ;;
+        *) assert_equal "rule 6: beta + feature/X fails" "ok" "got: $out" ;;
+    esac
+
+    # Rule 6: beta dispatch with main -> exit 2
+    export INPUT_SOURCE_BRANCH=main
+    out=$(lookup_tags()    { :; }; \
+          lookup_releases(){ :; }; \
+          resolve_main 2>&1 >/dev/null; echo "exit=$?")
+    case "$out" in
+        *"Beta dispatches must build from develop"*"exit=2") assert_equal "rule 6: beta + main fails" "ok" "ok" ;;
+        *) assert_equal "rule 6: beta + main fails" "ok" "got: $out" ;;
+    esac
+
+    # Rule 6: beta dispatch with empty source_branch -> succeeds
+    export INPUT_SOURCE_BRANCH=""
+    out=$(lookup_tags()    { :; }; \
+          lookup_releases(){ :; }; \
+          resolve_main 2>/dev/null)
+    assert_equal "rule 6: beta + empty source_branch succeeds" "beta" \
+        "$(echo "$out" | grep '^release_type=' | cut -d= -f2)"
 
     rm -f "$wixproj_tmp"
     unset WIXPROJ_PATH TODAY_OVERRIDE GITHUB_EVENT_NAME GITHUB_REF_NAME INPUT_RELEASE_TYPE INPUT_SOURCE_BRANCH
