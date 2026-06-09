@@ -18,25 +18,25 @@
 # appear automatically without further changes here.
 #
 # Required environment:
-#   ANCHOR_TAG           Anchor for the diff section. Empty when ANCHOR_KIND=none.
-#   ANCHOR_KIND          'stable' or 'none', from find-previous-release.sh.
 #   SOURCE_BRANCH        Source branch that built this artefact, from resolve.
+#   GITHUB_EVENT_NAME    Provided by GitHub Actions. Used to detect non-canonical workflow_dispatch.
 #   BUILT_AT             ISO8601 UTC timestamp from dep-manifest.json's built_at field.
 #   GITHUB_SERVER_URL    Provided by GitHub Actions.
 #   GITHUB_REPOSITORY    Provided by GitHub Actions.
 #   GITHUB_RUN_ID        Provided by GitHub Actions.
 #   GITHUB_SHA           Provided by GitHub Actions.
-#   GITHUB_EVENT_NAME    Provided by GitHub Actions.
 #   GH_TOKEN             Token with 'actions: read' on the repo.
 #   RELEASE_TYPE         'alpha' or 'beta'. Drives the intro sentence.
 #   IS_PRERELEASE        'true' or 'false'. Drives the intro sentence.
 #
 # Optional local file:
-#   release-notes-section.md  Output from generate_release_notes.py. Required
-#                             only when the canonical render branch fires.
+#   release-notes-section.md  Output from generate_release_notes.py.
+#                             Required when the canonical render branch fires
+#                             (i.e. when source_branch=develop). Otherwise the
+#                             non-canonical warning block is emitted instead.
 #
 # Output:
-#   release-body.md           Final body, ready for softprops/action-gh-release.
+#   release-body.md      Final body, ready for softprops/action-gh-release.
 set -eu
 
 run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
