@@ -237,7 +237,7 @@ resolve_main() {
             else
                 should_publish=false
                 release_tag=""
-                printf '::warning title=Wixproj bump needed::v%s.%s.0 already shipped on this line. Bump BHoM_Installer.wixproj MinorVersion (or MajorVersion) on develop before the next nightly so it can publish.\n' "$wix_m" "$wix_n" >&2
+                printf '::warning title=Wixproj bump needed::v%s.%s.0-beta already shipped on this line. Bump BHoM_Installer.wixproj MinorVersion (or MajorVersion) on develop before the next nightly so it can publish.\n' "$wix_m" "$wix_n" >&2
             fi
             # msi_patch_version="" — Build-Installer.ps1 defaults to yyMMdd.
             ;;
