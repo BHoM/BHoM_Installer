@@ -20,7 +20,7 @@
     'alpha-beta' (release candidate) and 'beta' (shipped) both build the beta-tier
     set and are passed to WiX as 'beta' so the wixproj's two-configuration scheme
     (alpha / beta) is preserved. The distinction between 'alpha-beta' and 'beta'
-    lives in the GitHub Release flags (prerelease vs final) and the tag form,
+    lives in the GitHub Release flags (prerelease=true vs prerelease=false) and the tag form,
     not in the .msi itself.
 
 .PARAMETER PatchVersion

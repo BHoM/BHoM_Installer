@@ -3,7 +3,7 @@
 # existing one if a same-day failure already produced one with the same title.
 #
 # Only schedule events trigger this script (per build-installer.yml's
-# notify-on-failure job condition). Dispatched runs (alpha / rc / final) are
+# notify-on-failure job condition). Dispatched runs (alpha / alpha-beta / beta) are
 # attended by the human who triggered them; no issue is opened for those.
 #
 # Two layers of signal:

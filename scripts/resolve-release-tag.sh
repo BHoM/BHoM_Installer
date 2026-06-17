@@ -462,7 +462,7 @@ EOF
 
     # ── warn_non_conventional_dependency_branch ──
     # Soft warning: returns 0 always, but emits ::warning:: to stderr when
-    # release_type is rc/final AND dep_branch is non-conventional.
+    # release_type is alpha-beta/beta AND dep_branch is non-conventional.
 
     assert_equal "warn: alpha-beta + dep_branch=develop is silent" "" \
         "$(warn_non_conventional_dependency_branch alpha-beta develop 2>&1)"
