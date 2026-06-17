@@ -24,8 +24,8 @@ set -eu
 today=$(date -u +%Y-%m-%d)
 run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
-title="[CI] Wixproj bump needed: v${WIX_MAJOR}.${WIX_MINOR}.0 already shipped"
-annotation="Wixproj bump needed for v${WIX_MAJOR}.${WIX_MINOR}.0"
+title="[CI] Wixproj bump needed: v${WIX_MAJOR}.${WIX_MINOR}.0-beta already shipped"
+annotation="Wixproj bump needed for v${WIX_MAJOR}.${WIX_MINOR}.0-beta"
 
 # Workflow-page annotation: lower bound, fires regardless of repo config.
 echo "::warning title=${annotation}::See $run_url"
@@ -39,7 +39,7 @@ if [ "$has_issues" != "true" ]; then
 fi
 
 body=$(cat <<EOF
-The scheduled nightly alpha build cannot publish because \`v${WIX_MAJOR}.${WIX_MINOR}.0\` has already shipped on this line. Build and install-test ran successfully — the smoke signal is preserved — but no GitHub Release was created for this run.
+The scheduled nightly alpha build cannot publish because \`v${WIX_MAJOR}.${WIX_MINOR}.0-beta\` has already shipped on this line. Build and install-test ran successfully — the smoke signal is preserved — but no GitHub Release was created for this run.
 
 To unblock further nightly publishes:
 

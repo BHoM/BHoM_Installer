@@ -15,12 +15,13 @@
     Azure Pipelines path, which is being retired alongside BHoMBot).
 
 .PARAMETER ReleaseType
-    'alpha', 'rc', or 'beta'. Drives the WiX ReleaseType property and whether
-    alphaIncludes.txt + alphaConfigs.txt are added to the clone set.
-    'rc' (release candidate) builds the beta-tier set and is passed to WiX as
-    'beta' so the wixproj's ReleaseVersion mapping stays unchanged. The
-    distinction between 'rc' and 'beta' lives in the GitHub Release flags
-    (prerelease vs final), not in the .msi itself.
+    'alpha', 'alpha-beta', or 'beta'. Drives the WiX ReleaseType property and
+    whether alphaIncludes.txt + alphaConfigs.txt are added to the clone set.
+    'alpha-beta' (release candidate) and 'beta' (shipped) both build the beta-tier
+    set and are passed to WiX as 'beta' so the wixproj's two-configuration scheme
+    (alpha / beta) is preserved. The distinction between 'alpha-beta' and 'beta'
+    lives in the GitHub Release flags (prerelease=true vs prerelease=false) and the tag form,
+    not in the .msi itself.
 
 .PARAMETER PatchVersion
     Patch version, yyMMdd format. Defaults to today.
@@ -45,7 +46,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('alpha', 'rc', 'final')]
+    [ValidateSet('alpha', 'alpha-beta', 'beta')]
     [string]$ReleaseType,
 
     [string]$PatchVersion,
@@ -281,14 +282,13 @@ Write-Host "::group::Build installer ($ReleaseType, patch=$PatchVersion)"
 if ($LASTEXITCODE -ne 0) { throw "NuGet restore failed for installer solution" }
 
 # Map ReleaseType to the WiX ReleaseType property. The wixproj only declares
-# branches for 'alpha' and 'beta', so 'rc' and 'final' both collapse to
-# 'beta' here (rc and final are beta-tier builds in terms of contents;
-# the distinction between them lives in the GitHub Release flags rather
-# than the .msi).
+# Configurations for 'alpha' and 'beta', so 'alpha-beta' collapses to 'beta'
+# here (release-candidate builds use the beta-tier set; the distinction
+# between alpha-beta and beta lives in the GitHub Release flags and the tag
+# form rather than the .msi).
 $wixReleaseType = switch ($ReleaseType) {
-    'rc'    { 'beta' }
-    'final' { 'beta' }
-    default { $ReleaseType }
+    'alpha-beta' { 'beta' }
+    default      { $ReleaseType }
 }
 
 $msbuildArgs = @(

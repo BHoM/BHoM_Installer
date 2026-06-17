@@ -28,11 +28,13 @@ lookup_releases() {
         --json tagName --jq '.[].tagName'
 }
 
-# Parse a stable tag (vM.N.P) into M N P components.
+# Parse a stable tag (vM.N.P-beta) into M N P components.
+# Under the SemVer perpetual-pre-release model the shipped tag carries the
+# '-beta' suffix; no plain 'vM.N.P' tag is ever produced.
 # Returns non-zero on a non-stable tag.
 parse_stable_tag() {
     local tag="$1"
-    if [[ "$tag" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+    if [[ "$tag" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)-beta$ ]]; then
         printf '%s %s %s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}"
         return 0
     fi
@@ -41,14 +43,29 @@ parse_stable_tag() {
 
 # Parse the release tag being published. Sets globals REQ_M, REQ_N, REQ_P,
 # REQ_IS_PRERELEASE.
+#
+# Under the SemVer perpetual-pre-release model, the project treats
+# 'v{M}.{N}.{P}-beta' (with no further suffix) as the 'stable' tier
+# (IS_PRERELEASE=false) even though SemVer formally classifies it as a
+# pre-release. This makes the existing Rule A / Rule B bifurcation in
+# select_anchor continue to work without restructuring.
 parse_release_tag() {
     local tag="$1"
-    if [[ "$tag" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)-(alpha|beta|rc)(\.[0-9a-zA-Z.]+)?$ ]]; then
+    # 'v{M}.{N}.{P}-beta' — the new shipped tier.
+    if [[ "$tag" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)-beta$ ]]; then
+        REQ_M="${BASH_REMATCH[1]}"
+        REQ_N="${BASH_REMATCH[2]}"
+        REQ_P="${BASH_REMATCH[3]}"
+        REQ_IS_PRERELEASE=false
+        return 0
+    # Any other suffixed pre-release: alpha.YYMMDD[.N], alpha.beta.N, rc.N (legacy).
+    elif [[ "$tag" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)-(alpha|beta|rc)(\.[0-9a-zA-Z.]+)?$ ]]; then
         REQ_M="${BASH_REMATCH[1]}"
         REQ_N="${BASH_REMATCH[2]}"
         REQ_P="${BASH_REMATCH[3]}"
         REQ_IS_PRERELEASE=true
         return 0
+    # Plain v{M}.{N}.{P} — no longer produced but kept parseable for historical sandbox state.
     elif [[ "$tag" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
         REQ_M="${BASH_REMATCH[1]}"
         REQ_N="${BASH_REMATCH[2]}"
@@ -87,7 +104,7 @@ select_anchor() {
 
     # Rule B: patches (P > 0 on a stable tag, no prerelease).
     if [ "$is_prerelease" = "false" ] && [ "$p" -gt 0 ]; then
-        local target="v${m}.${n}.0"
+        local target="v${m}.${n}.0-beta"
         local c
         for c in "${candidates[@]}"; do
             local c_tag="${c##* }"
@@ -173,88 +190,88 @@ self_test() {
         "anchor_tag=" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
-    # Case 2: v9.1.0 prior -> v9.1.0
-    lookup_releases() { printf '%s\n' "v9.1.0"; }
+    # Case 2: v9.1.0-beta prior -> v9.1.0-beta
+    lookup_releases() { printf '%s\n' "v9.1.0-beta"; }
     out=$(main "v9.2.0-alpha.260605")
-    assert_equal "case 2: v9.1.0 prior -> v9.1.0" \
-        "anchor_tag=v9.1.0" \
+    assert_equal "case 2: v9.1.0-beta prior -> v9.1.0-beta" \
+        "anchor_tag=v9.1.0-beta" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
-    # Case 3: v9.1.0 + v9.1.2 prior -> v9.1.2 (highest patch in M.N wins)
-    lookup_releases() { printf '%s\n' "v9.1.0" "v9.1.2"; }
+    # Case 3: v9.1.0-beta + v9.1.2-beta prior -> v9.1.2-beta (highest patch in M.N wins)
+    lookup_releases() { printf '%s\n' "v9.1.0-beta" "v9.1.2-beta"; }
     out=$(main "v9.2.0-alpha.260605")
-    assert_equal "case 3: v9.1.0 and v9.1.2 prior -> v9.1.2" \
-        "anchor_tag=v9.1.2" \
+    assert_equal "case 3: v9.1.0-beta and v9.1.2-beta prior -> v9.1.2-beta" \
+        "anchor_tag=v9.1.2-beta" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
     # Case 12: SemVer sort beats back-port publish order
-    lookup_releases() { printf '%s\n' "v9.1.3" "v9.2.0" "v9.1.0"; }
+    lookup_releases() { printf '%s\n' "v9.1.3-beta" "v9.2.0-beta" "v9.1.0-beta"; }
     out=$(main "v9.3.0-alpha.260801")
     assert_equal "case 12: SemVer sort beats back-port publish order" \
-        "anchor_tag=v9.2.0" \
+        "anchor_tag=v9.2.0-beta" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
-    # Case 4: ignores alpha/beta/rc tags as candidates
-    lookup_releases() { printf '%s\n' "v9.1.0-alpha.260101" "v9.1.0-beta.1" "v9.1.0-rc.1" "v9.1.0"; }
+    # Case 4: ignores non-beta pre-release tags as candidates
+    lookup_releases() { printf '%s\n' "v9.1.0-alpha.260101" "v9.1.0-alpha.beta.1" "v9.1.0-beta"; }
     out=$(main "v9.2.0-alpha.260605")
-    assert_equal "case 4: only stable tags are candidates" \
-        "anchor_tag=v9.1.0" \
+    assert_equal "case 4: only -beta tags are candidates" \
+        "anchor_tag=v9.1.0-beta" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
-    # Case 4b: rc release-tag parses correctly (regression guard for the
-    # PR #14 rename that originally missed this script).
-    lookup_releases() { printf '%s\n' "v9.1.0"; }
-    out=$(main "v9.2.0-rc.4")
-    assert_equal "case 4b: rc tag parses, anchors against v9.1.0" \
-        "anchor_tag=v9.1.0" \
+    # Case 4b: alpha-beta release-tag parses correctly (regression guard for the
+    # rename — alpha.beta tags must parse via parse_release_tag).
+    lookup_releases() { printf '%s\n' "v9.1.0-beta"; }
+    out=$(main "v9.2.0-alpha.beta.4")
+    assert_equal "case 4b: alpha-beta tag parses, anchors against v9.1.0-beta" \
+        "anchor_tag=v9.1.0-beta" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
-    # Case 5: final v9.2.0 with v9.1.0 + v9.1.2 prior -> v9.1.2
-    lookup_releases() { printf '%s\n' "v9.1.0" "v9.1.2"; }
-    out=$(main "v9.2.0")
-    assert_equal "case 5: final v9.2.0 anchors against v9.1.2" \
-        "anchor_tag=v9.1.2" \
+    # Case 5: beta v9.2.0-beta with v9.1.0-beta + v9.1.2-beta prior -> v9.1.2-beta
+    lookup_releases() { printf '%s\n' "v9.1.0-beta" "v9.1.2-beta"; }
+    out=$(main "v9.2.0-beta")
+    assert_equal "case 5: beta v9.2.0-beta anchors against v9.1.2-beta" \
+        "anchor_tag=v9.1.2-beta" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
     # Case 9: current tag never anchored to itself
-    lookup_releases() { printf '%s\n' "v9.2.0-alpha.260605" "v9.1.0"; }
+    lookup_releases() { printf '%s\n' "v9.2.0-alpha.260605" "v9.1.0-beta"; }
     out=$(main "v9.2.0-alpha.260605")
     assert_equal "case 9: self never returned as anchor" \
-        "anchor_tag=v9.1.0" \
+        "anchor_tag=v9.1.0-beta" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
     # Case 10: double-digit version
-    lookup_releases() { printf '%s\n' "v10.13.5"; }
+    lookup_releases() { printf '%s\n' "v10.13.5-beta"; }
     out=$(main "v10.14.0-alpha.270101")
     assert_equal "case 10: double-digit version anchors correctly" \
-        "anchor_tag=v10.13.5" \
+        "anchor_tag=v10.13.5-beta" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
-    # Case 11: v9.3.0-alpha with v9.2.5 latest stable -> v9.2.5
-    lookup_releases() { printf '%s\n' "v9.2.0" "v9.2.5" "v9.1.0"; }
+    # Case 11: v9.3.0-alpha with v9.2.5-beta latest stable -> v9.2.5-beta
+    lookup_releases() { printf '%s\n' "v9.2.0-beta" "v9.2.5-beta" "v9.1.0-beta"; }
     out=$(main "v9.3.0-alpha.260801")
-    assert_equal "case 11: v9.3.0-alpha anchors against highest M.N stable v9.2.5" \
-        "anchor_tag=v9.2.5" \
+    assert_equal "case 11: v9.3.0-alpha anchors against highest M.N stable v9.2.5-beta" \
+        "anchor_tag=v9.2.5-beta" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
-    # Case 6: patch v9.2.1 with v9.2.0 shipped -> v9.2.0
-    lookup_releases() { printf '%s\n' "v9.1.0" "v9.2.0"; }
-    out=$(main "v9.2.1")
-    assert_equal "case 6: patch v9.2.1 -> v9.2.0" \
-        "anchor_tag=v9.2.0" \
+    # Case 6: patch v9.2.1-beta with v9.2.0-beta shipped -> v9.2.0-beta
+    lookup_releases() { printf '%s\n' "v9.1.0-beta" "v9.2.0-beta"; }
+    out=$(main "v9.2.1-beta")
+    assert_equal "case 6: patch v9.2.1-beta -> v9.2.0-beta" \
+        "anchor_tag=v9.2.0-beta" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
-    # Case 7: patch v9.2.5 with v9.2.0-v9.2.4 -> v9.2.0 (cumulative within patch series)
-    lookup_releases() { printf '%s\n' "v9.1.0" "v9.2.0" "v9.2.1" "v9.2.2" "v9.2.3" "v9.2.4"; }
-    out=$(main "v9.2.5")
-    assert_equal "case 7: patch v9.2.5 -> v9.2.0 (cumulative)" \
-        "anchor_tag=v9.2.0" \
+    # Case 7: patch v9.2.5-beta with v9.2.0-beta..v9.2.4-beta -> v9.2.0-beta (cumulative)
+    lookup_releases() { printf '%s\n' "v9.1.0-beta" "v9.2.0-beta" "v9.2.1-beta" "v9.2.2-beta" "v9.2.3-beta" "v9.2.4-beta"; }
+    out=$(main "v9.2.5-beta")
+    assert_equal "case 7: patch v9.2.5-beta -> v9.2.0-beta (cumulative)" \
+        "anchor_tag=v9.2.0-beta" \
         "$(echo "$out" | grep '^anchor_tag=')"
 
-    # Case 8: patch with no v{M}.{N}.0 (defensive) -> kind=none
-    lookup_releases() { printf '%s\n' "v9.1.0"; }
-    out=$(main "v9.2.1")
-    assert_equal "case 8: patch with no v.0 -> anchor_kind=none" \
+    # Case 8: patch with no v{M}.{N}.0-beta (defensive) -> kind=none
+    lookup_releases() { printf '%s\n' "v9.1.0-beta"; }
+    out=$(main "v9.2.1-beta")
+    assert_equal "case 8: patch with no v.0-beta -> anchor_kind=none" \
         "anchor_kind=none" \
         "$(echo "$out" | grep '^anchor_kind=')"
 
