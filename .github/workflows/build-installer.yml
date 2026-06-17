@@ -4,13 +4,13 @@
 #   1. Installer branch  : "Use workflow from Branch" (GHA's --ref). The
 #                          installer repo is checked out at this ref and
 #                          the resulting release tag lands on this branch's
-#                          HEAD. Hard rule: final dispatches must use main.
-#   2. Release type      : workflow_dispatch input. alpha | rc | final.
+#                          HEAD. Hard rule: beta dispatches must use main.
+#   2. Release type      : workflow_dispatch input. alpha | alpha-beta | beta.
 #   3. Dependency branch : workflow_dispatch input. The branch tried on
 #                          each dep clone; falls back to that dep's own
 #                          default branch if absent. Convention is 'develop'
-#                          for rc/final; non-conventional values surface a
-#                          warning but are not blocked.
+#                          for alpha-beta/beta; non-conventional values
+#                          surface a warning but are not blocked.
 #
 # Triggers and the release flavours they produce:
 #
@@ -27,21 +27,23 @@ on:
     inputs:
       release_type:
         description: |
-          alpha — pre-release. Tag: vM.N.0-alpha.YYMMDD[.counter]. May be
-                  dispatched from any installer-repo branch.
-          rc    — release candidate (use during feature-freeze QA). Tag:
-                  vM.N.0-rc.counter. May be dispatched from any installer-repo
-                  branch. dependency_branch convention is develop (warning if not).
-          final — finalised release. Tag: vM.N.0 derived from BHoM_Installer.wixproj.
-                  Marked Latest on the Releases page; prerelease=false.
-                  MUST be dispatched with "Use workflow from Branch" set to main
-                  (the workflow rejects any other ref). dependency_branch
-                  convention is develop (warning if not).
+          alpha      — pre-release. Tag: vM.N.0-alpha.YYMMDD[.counter]. May be
+                       dispatched from any installer-repo branch.
+          alpha-beta — release candidate (use during feature-freeze QA). Tag:
+                       vM.N.0-alpha.beta.counter. May be dispatched from any
+                       installer-repo branch. dependency_branch convention is
+                       develop (warning if not).
+          beta       — shipped release. Tag: vM.N.0-beta derived from
+                       BHoM_Installer.wixproj's MajorVersion/MinorVersion.
+                       Marked Latest on the Releases page; prerelease=false.
+                       MUST be dispatched with "Use workflow from Branch" set to
+                       main (the workflow rejects any other ref). dependency_branch
+                       convention is develop (warning if not).
         type: choice
         options:
           - alpha
-          - rc
-          - final
+          - alpha-beta
+          - beta
         default: alpha
       dependency_branch:
         description: |
@@ -51,7 +53,7 @@ on:
           Default 'develop' for all release types.
           Useful for testing a feature branch across deps that share the
           branch name (alpha workflow).
-          For rc and final dispatches: convention is develop; a non-conventional
+          For alpha-beta and beta dispatches: convention is develop; a non-conventional
           value surfaces a warning in the run log and release body but is not
           rejected.
         type: string
@@ -102,7 +104,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           # GITHUB_REF is set by GHA automatically; the resolve script reads
-          # it as the workflow-ref input (rule 6: final must equal refs/heads/main).
+          # it as the workflow-ref input (rule 6: beta must equal refs/heads/main).
           INPUT_RELEASE_TYPE:      ${{ inputs.release_type }}
           INPUT_DEPENDENCY_BRANCH: ${{ inputs.dependency_branch }}
         run: |
@@ -224,7 +226,7 @@ jobs:
           }
           # Only forward MSI_PATCH_VERSION when resolve emitted one. Alpha
           # leaves it blank so Build-Installer.ps1 falls through to its yyMMdd
-          # default. RC and final flavours set it explicitly so the MSI
+          # default. alpha-beta and beta flavours set it explicitly so the MSI
           # filename matches the release tag.
           if ($env:MSI_PATCH_VERSION) { $splat['PatchVersion'] = $env:MSI_PATCH_VERSION }
 
@@ -451,10 +453,10 @@ jobs:
   # Publish the .msi as a preserved per-build GitHub Release. The flavour
   # is determined by what triggered the run, normalised in the resolve job:
   #
-  #   schedule        alpha   prerelease=true   tag = vM.N.0-alpha.YYMMDD[.counter]
-  #   dispatch alpha  alpha   prerelease=true   tag = vM.N.0-alpha.YYMMDD[.counter]
-  #   dispatch rc     rc      prerelease=true   tag = vM.N.0-rc.N
-  #   dispatch final  final   prerelease=false  tag = vM.N.0, marked Latest
+  #   schedule            alpha       prerelease=true   tag = vM.N.0-alpha.YYMMDD[.counter]
+  #   dispatch alpha      alpha       prerelease=true   tag = vM.N.0-alpha.YYMMDD[.counter]
+  #   dispatch alpha-beta alpha-beta  prerelease=true   tag = vM.N.0-alpha.beta.N
+  #   dispatch beta       beta        prerelease=false  tag = vM.N.0-beta, marked Latest
   #
   # softprops/action-gh-release creates the git tag at the workflow's commit
   # if it does not already exist. For dispatched runs the tag is therefore
@@ -503,14 +505,14 @@ jobs:
         run: |
           set -eu
           # The resolve job always emits release_tag for every supported event
-          # (schedule / dispatch alpha / dispatch rc / dispatch final), so we
+          # (schedule / dispatch alpha / dispatch alpha-beta / dispatch beta), so we
           # reuse it directly. The release name varies by flavour.
           tag="$RESOLVED_TAG"
           case "$RELEASE_TYPE" in
-              final) name="BHoM ${tag} Release" ;;
-              rc)    name="BHoM ${tag} Release Candidate" ;;
-              alpha) name="BHoM ${tag} Alpha" ;;
-              *)     name="BHoM ${tag}" ;;
+              beta)       name="BHoM ${tag} Release" ;;
+              alpha-beta) name="BHoM ${tag} Release Candidate" ;;
+              alpha)      name="BHoM ${tag} Alpha" ;;
+              *)          name="BHoM ${tag}" ;;
           esac
           echo "tag=$tag"   >> "$GITHUB_OUTPUT"
           echo "name=$name" >> "$GITHUB_OUTPUT"
@@ -526,8 +528,8 @@ jobs:
       - name: Download anchor's dep-manifest
         id: prev-manifest
         # Diff section renders for canonical installer-ref builds only:
-        #   alpha / rc -> installer_ref=develop
-        #   final      -> installer_ref=main (hard rule enforced at resolve)
+        #   alpha / alpha-beta -> installer_ref=develop
+        #   beta               -> installer_ref=main (hard rule enforced at resolve)
         # Non-canonical dispatches (typically alpha-from-feature-branch) skip
         # the download; compose-release-body.sh renders a warning block instead.
         if: |
@@ -634,7 +636,7 @@ jobs:
   # Open a GitHub Issue when an unattended build fails, so the breakage does
   # not rot silently. Fires on:
   #   schedule    Scheduled nightly. Nobody is watching at 00:45 UTC.
-  # Does NOT fire on workflow_dispatch failures (alpha, rc, or final) because
+  # Does NOT fire on workflow_dispatch failures (alpha, alpha-beta, or beta) because
   # the human who triggered the run is already watching the Actions tab.
   notify-on-failure:
     name: Open issue on failed nightly build
