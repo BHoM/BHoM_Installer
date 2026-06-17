@@ -534,8 +534,8 @@ jobs:
         # the download; compose-release-body.sh renders a warning block instead.
         if: |
           steps.anchor.outputs.anchor_kind == 'stable' && (
-            (needs.resolve.outputs.installer_ref == 'develop' && needs.resolve.outputs.release_type != 'final') ||
-            (needs.resolve.outputs.installer_ref == 'main' && needs.resolve.outputs.release_type == 'final')
+            (needs.resolve.outputs.installer_ref == 'develop' && needs.resolve.outputs.release_type != 'beta') ||
+            (needs.resolve.outputs.installer_ref == 'main' && needs.resolve.outputs.release_type == 'beta')
           )
         env:
           GH_TOKEN: ${{ github.token }}
@@ -557,8 +557,8 @@ jobs:
       - name: Generate dep-change release-notes section
         if: |
           steps.anchor.outputs.anchor_kind == 'stable' && steps.prev-manifest.outputs.path != '' && (
-            (needs.resolve.outputs.installer_ref == 'develop' && needs.resolve.outputs.release_type != 'final') ||
-            (needs.resolve.outputs.installer_ref == 'main' && needs.resolve.outputs.release_type == 'final')
+            (needs.resolve.outputs.installer_ref == 'develop' && needs.resolve.outputs.release_type != 'beta') ||
+            (needs.resolve.outputs.installer_ref == 'main' && needs.resolve.outputs.release_type == 'beta')
           )
         env:
           GH_TOKEN: ${{ github.token }}

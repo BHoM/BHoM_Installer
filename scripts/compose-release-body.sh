@@ -19,7 +19,7 @@
 # Three-input model (see proposal.md Section 6):
 #   - INSTALLER_REF      The installer-repo branch the workflow ran on. Drives
 #                        the canonical/non-canonical determination (canonical
-#                        means develop for alpha/rc, main for final — these
+#                        means develop for alpha/alpha-beta, main for beta — these
 #                        are the branches where release notes can be diffed
 #                        meaningfully).
 #   - DEPENDENCY_BRANCH  The dep-clone try-first branch. Provenance only here.
@@ -34,7 +34,7 @@
 #   GITHUB_RUN_ID        Provided by GitHub Actions.
 #   GITHUB_SHA           Provided by GitHub Actions.
 #   GH_TOKEN             Token with 'actions: read' on the repo.
-#   RELEASE_TYPE         'alpha' | 'rc' | 'final'. Drives the intro sentence.
+#   RELEASE_TYPE         'alpha' | 'alpha-beta' | 'beta'. Drives the intro sentence.
 #   IS_PRERELEASE        'true' or 'false'. Drives the intro sentence.
 #
 # Optional local file:
@@ -50,12 +50,12 @@ run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
 
 # Decide whether this build is on the canonical lineage based on the
 # installer-repo branch the workflow ran on:
-#   alpha / rc -> develop
-#   final      -> main (hard rule enforced at resolve)
+#   alpha / alpha-beta -> develop
+#   beta               -> main (hard rule enforced at resolve)
 # Anything else is a non-canonical dispatch (typically alpha from a feature
 # branch), which renders a warning block instead of the diff section.
 case "${RELEASE_TYPE}" in
-    final)   canonical_installer_ref="main" ;;
+    beta)    canonical_installer_ref="main" ;;
     *)       canonical_installer_ref="develop" ;;
 esac
 is_non_canonical="false"
@@ -65,10 +65,10 @@ fi
 
 # Intro sentence varies by flavour.
 case "${RELEASE_TYPE}" in
-    final)
+    beta)
         intro="Release build of the BHoM installer produced by the CI pipeline."
         ;;
-    rc)
+    alpha-beta)
         intro="Release candidate build of the BHoM installer produced by the CI pipeline during a freeze window. See the build provenance below before installing."
         ;;
     *)
