@@ -123,6 +123,8 @@ C:\ProgramData\BHoM\Assemblies\Mono.Cecil.Pdb.dll
 C:\ProgramData\BHoM\Assemblies\Mono.Cecil.Rocks.dll
 C:\ProgramData\BHoM\Assemblies\Mono.Reflection.dll
 C:\ProgramData\BHoM\Assemblies\netstandard.dll
+C:\ProgramData\BHoM\Assemblies\OpenStreetMap_Engine.dll
+C:\ProgramData\BHoM\Assemblies\OpenStreetMap_oM.dll
 C:\ProgramData\BHoM\Assemblies\Physical_Engine.dll
 C:\ProgramData\BHoM\Assemblies\Physical_oM.dll
 C:\ProgramData\BHoM\Assemblies\Planning_Engine.dll
