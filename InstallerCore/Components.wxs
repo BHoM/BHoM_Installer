@@ -24,14 +24,6 @@
       </Component>
     </ComponentGroup>
 
-    <ComponentGroup Id="Revit2022" Directory="R2022DIR">
-      <Component Id="RevitAddin2022">
-        <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2022.Addin" />
-        <util:RemoveFolderEx On="install" Property="R2022BHoMFolder" />
-        <RemoveFile On="install" Id="RemoveLegacyAddin22" Name="BHoM.Addin"/>
-      </Component>
-    </ComponentGroup>
-
     <ComponentGroup Id="Revit2023" Directory="R2023DIR">
       <Component Id="RevitAddin2023">
         <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2023.Addin" />
@@ -61,6 +53,14 @@
         <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2026.Addin" />
         <util:RemoveFolderEx On="install" Property="R2026BHoMFolder" />
         <RemoveFile On="install" Id="RemoveLegacyAddin26" Name="BHoM.Addin"/>
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="Revit2027" Directory="R2027DIR">
+      <Component Id="RevitAddin2027">
+        <File Source="..\..\Revit_Toolkit\Revit_Core_Adapter\Listener\Files\BHoM_2027.Addin" />
+        <util:RemoveFolderEx On="install" Property="R2027BHoMFolder" />
+        <RemoveFile On="install" Id="RemoveLegacyAddin27" Name="BHoM.Addin"/>
       </Component>
     </ComponentGroup>
 
@@ -96,12 +96,6 @@
       </Component>
     </ComponentGroup>
 
-    <ComponentGroup Id="RevitSettingsConfig2022" Directory="REVITSETTINGSDIR2022">
-      <Component Id="RevitSettingsConfig2022" Guid="81ca731c-6965-451a-9706-416db6231350">
-        <CreateFolder />
-      </Component>
-    </ComponentGroup>
-
     <ComponentGroup Id="RevitSettingsConfig2023" Directory="REVITSETTINGSDIR2023">
       <Component Id="RevitSettingsConfig2023" Guid="d7ab23c4-8071-44a5-92f5-8656b92cc606">
         <CreateFolder />
@@ -126,6 +120,12 @@
       </Component>
     </ComponentGroup>
 
+    <ComponentGroup Id="RevitSettingsConfig2027" Directory="REVITSETTINGSDIR2027">
+      <Component Id="RevitSettingsConfig2027" Guid="eaf4b32d-f888-4ffc-8426-d6e665f1700e">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+
     <ComponentGroup Id="ExtensionsConfig" Directory="EXTENSIONSDIR">
       <Component Id="ExtensionsConfig" Guid="b8cd0c91-2ebc-4bd6-ad2b-1e28fc9e6ad3">
         <CreateFolder />
@@ -134,12 +134,6 @@
     
     <ComponentGroup Id="RevitExtensionsConfig" Directory="REVITEXTENSIONSDIR">
       <Component Id="RevitExtensionsConfig" Guid="6cf78449-1a6e-42c5-8212-9e39e85dcc59">
-        <CreateFolder />
-      </Component>
-    </ComponentGroup>
-
-    <ComponentGroup Id="RevitExtensionsConfig2022" Directory="REVITEXTENSIONSDIR2022">
-      <Component Id="RevitExtensionsConfig2022" Guid="b325b038-fcea-48df-819d-eb40d44f3733">
         <CreateFolder />
       </Component>
     </ComponentGroup>
@@ -164,6 +158,12 @@
 
     <ComponentGroup Id="RevitExtensionsConfig2026" Directory="REVITEXTENSIONSDIR2026">
       <Component Id="RevitExtensionsConfig2026" Guid="5f7df272-f12a-41a0-ad1b-d6414a7a1487">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="RevitExtensionsConfig2027" Directory="REVITEXTENSIONSDIR2027">
+      <Component Id="RevitExtensionsConfig2027" Guid="c66a3327-6387-40df-8444-34fe52259287">
         <CreateFolder />
       </Component>
     </ComponentGroup>
